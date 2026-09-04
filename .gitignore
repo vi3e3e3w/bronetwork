@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+.venv/
+
+# Chat history
+.chat-history/
+
+# Broternet runtime data
+broternet/.posts/
+broternet/.images/
+broternet/.music/
+broternet/.videos/
+broternet/uploads/
+
+# BroNetwork uploads/runtime data
+uploads/
+
+# Local user/database data
+users.json
+
+# Logs
+*.log
+
+# Environment/secrets
+.env
