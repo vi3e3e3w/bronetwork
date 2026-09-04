@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>PushUp | Bro Network</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link rel="stylesheet" href="pushup.css">
+
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- HEADER -->
+
+<header>
+
+    <div class="brand">
+
+        <div class="logo-dot"></div>
+
+        <img
+            src="logo.svg"
+            alt="Bro Network"
+            class="brand-logo"
+        >
+
+    </div>
+
+
+    <nav>
+
+        <a href="index.html">
+            Home
+        </a>
+
+        <a href="lchat.html">
+            Local Chat
+        </a>
+
+        <a href="brodiscover.html">
+            Discover
+        </a>
+
+    </nav>
+
+
+    <button
+        class="user-id"
+        onclick="login()"
+    >
+        ID
+    </button>
+
+</header>
+
+
+<!-- MAIN -->
+
+<main class="pushup-main">
+
+
+    <section class="pushup-title">
+
+        <p class="eyebrow">
+            LOCAL FILE TRANSFER
+        </p>
+
+        <h1>
+            PushUp
+        </h1>
+
+        <p>
+            Send files directly to users
+            connected to Bro Network.
+        </p>
+
+    </section>
+
+
+    <!-- USER STATUS -->
+
+    <section class="pushup-status">
+
+        <div class="active-users">
+
+            <h2 class="active-user-count">
+                0
+            </h2>
+
+            <span>
+                ACTIVE USERS
+            </span>
+
+        </div>
+
+
+        <div class="my-id-box">
+
+            YOUR ID
+
+            <b id="my-id">
+                Loading...
+            </b>
+
+        </div>
+
+    </section>
+
+
+    <!-- SEND FILE -->
+
+    <section class="transfer-panel">
+
+        <h2>
+            Send File
+        </h2>
+
+
+        <label
+            for="target-user"
+            class="field-label"
+        >
+            SEND TO
+        </label>
+
+
+        <select id="target-user">
+
+            <option>
+                Loading users...
+            </option>
+
+        </select>
+
+
+        <label
+            for="fileInput"
+            class="field-label"
+        >
+            SELECT FILE
+        </label>
+
+
+        <input
+            type="file"
+            id="fileInput"
+        >
+
+
+        <button
+            onclick="uploadFile()"
+            class="send-file-button"
+        >
+
+            File to Send +
+
+        </button>
+
+
+        <p id="result"></p>
+
+    </section>
+
+
+    <!-- INBOX -->
+
+    <section class="inbox-panel">
+
+        <div class="panel-title">
+
+            <span>
+                INBOX
+            </span>
+
+            <span>
+                📥
+            </span>
+
+        </div>
+
+
+        <div id="inbox">
+
+            Loading inbox...
+
+        </div>
+
+    </section>
+
+
+</main>
+
+
+<!-- FOOTER -->
+
+<footer>
+
+    <span>
+        BRO NETWORK
+    </span>
+
+    <span>
+        NO INTERNET REQUIRED
+    </span>
+
+</footer>
+
+</div>
+
+<!-- BRO PROMPT -->
+
+<div id="bro-prompt" class="bro-dialog">
+
+    <div class="bro-dialog-box">
+
+        <div
+            id="bro-prompt-content"
+            class="bro-dialog-content"
+        ></div>
+
+        <input
+            id="bro-prompt-input"
+            type="text"
+            autocomplete="off"
+        >
+
+        <div class="bro-dialog-actions">
+
+            <button id="bro-prompt-ok">
+                OK
+            </button>
+
+            <button id="bro-prompt-cancel">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+
+<script src="pushup.js"></script>
+
+</body>
+
+</html>

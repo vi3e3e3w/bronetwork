@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Status | Bro Network</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link rel="stylesheet" href="status.css">
+
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- HEADER -->
+
+<header>
+
+    <div class="brand">
+
+        <div class="logo-dot"></div>
+
+        <img
+            src="logo.svg"
+            alt="Bro Network"
+            class="brand-logo"
+        >
+
+    </div>
+
+
+    <nav>
+
+        <a href="index.html">
+            Home
+        </a>
+
+        <a href="lchat.html">
+            Local Chat
+        </a>
+
+        <a href="brodiscover.html">
+            Discover
+        </a>
+
+    </nav>
+
+
+    <button
+        class="user-id"
+        onclick="login()"
+    >
+        ID
+    </button>
+
+</header>
+
+
+<!-- MAIN -->
+
+<main class="status-main">
+
+
+    <section class="status-title">
+
+        <p class="eyebrow">
+            SYSTEM MONITOR
+        </p>
+
+        <h1>
+            Network Status
+        </h1>
+
+        <p>
+            Current state of the
+            Bro Network system.
+        </p>
+
+    </section>
+
+
+    <!-- STATS -->
+
+    <section class="stats">
+
+
+        <div class="stat">
+
+            <h2 class="active-user-count">
+                0
+            </h2>
+
+            <p>
+                ACTIVE USERS
+            </p>
+
+        </div>
+
+
+        <div class="stat">
+
+            <h2 class="registered-user-count">
+                0
+            </h2>
+
+            <p>
+                REGISTERED USERS
+            </p>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- SYSTEM STATUS -->
+
+    <section class="system-panel">
+
+        <div class="panel-title">
+
+            SYSTEM SERVICES
+
+        </div>
+
+
+        <div class="status-item">
+
+            <span>
+                Ubuntu Server
+            </span>
+
+            <span class="online">
+                ● ONLINE
+            </span>
+
+        </div>
+
+
+        <div class="status-item">
+
+            <span>
+                Web Server
+            </span>
+
+            <span class="online">
+                ● ONLINE
+            </span>
+
+        </div>
+
+
+        <div class="status-item">
+
+            <span>
+                Local Network
+            </span>
+
+            <span class="online">
+                ● ONLINE
+            </span>
+
+        </div>
+
+
+        <div class="status-item">
+
+            <span>
+                Internet
+            </span>
+
+            <span class="offline">
+                ● NOT AVAILABLE
+            </span>
+
+        </div>
+
+
+    </section>
+
+
+</main>
+
+
+<!-- FOOTER -->
+
+<footer>
+
+    <span>
+        BRO NETWORK
+    </span>
+
+    <span>
+        NO INTERNET REQUIRED
+    </span>
+
+</footer>
+
+</div>
+
+<!-- BRO DIALOG -->
+
+<div id="bro-dialog" class="bro-dialog">
+
+    <div class="bro-dialog-box">
+
+        <div
+            id="bro-dialog-content"
+            class="bro-dialog-content"
+        ></div>
+
+        <div class="bro-dialog-actions">
+
+            <button id="bro-dialog-opt1">
+                OK
+            </button>
+
+            <button id="bro-dialog-opt2">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- BRO PROMPT -->
+
+<div id="bro-prompt" class="bro-dialog">
+
+    <div class="bro-dialog-box">
+
+        <div
+            id="bro-prompt-content"
+            class="bro-dialog-content"
+        ></div>
+
+        <input
+            id="bro-prompt-input"
+            type="text"
+            autocomplete="off"
+        >
+
+        <div class="bro-dialog-actions">
+
+            <button id="bro-prompt-ok">
+                OK
+            </button>
+
+            <button id="bro-prompt-cancel">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script src="script.js"></script>
+
+</body>
+
+</html>

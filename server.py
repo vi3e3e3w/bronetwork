@@ -1,0 +1,1341 @@
+import subprocess
+from datetime import datetime
+import json
+import time
+import os
+import re
+
+from flask import Flask, request, jsonify, send_from_directory
+
+app = Flask(__name__)
+
+active_users = {}
+notifications = {}
+
+ACTIVE_TIMEOUT = 60
+
+UPLOAD_FOLDER = "uploads"
+USERS_FILE = "users.json"
+CHAT_HISTORY_DIR = ".chat-history"
+
+os.makedirs(CHAT_HISTORY_DIR, exist_ok=True)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+
+def register_user():
+    ip = request.remote_addr
+    active_users[ip] = time.time()
+
+
+def load_users():
+    try:
+        with open(USERS_FILE, "r", encoding="utf-8") as file:
+            return json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+
+def get_chat_file():
+    today = datetime.now().strftime("%d-%m-%Y")
+    return os.path.join(CHAT_HISTORY_DIR, f"{today}.txt")
+
+
+@app.route("/api/me")
+def get_me():
+    register_user()
+
+    client_ip = request.remote_addr
+    users = load_users()
+
+    for user in users:
+        if user["ip"] == client_ip:
+            return jsonify({
+                "id": user["id"],
+                "ip": client_ip
+            })
+
+    return jsonify({
+        "id": None,
+        "ip": client_ip
+    })
+
+
+@app.route("/api/users")
+def api_users():
+    register_user()
+
+    users = load_users()
+    now = time.time()
+
+    user_list = []
+
+    for user in users:
+        ip = user["ip"]
+
+        is_online = (
+            ip in active_users
+            and now - active_users[ip] <= ACTIVE_TIMEOUT
+        )
+
+        user_list.append({
+            "id": user["id"],
+            "online": is_online
+        })
+
+    return jsonify(user_list)
+
+
+@app.route("/register", methods=["POST"])
+def register():
+    ip = request.remote_addr
+    user_id = ip.split(".")[-1]
+
+    users = load_users()
+
+    for user in users:
+        if user["ip"] == ip:
+            register_user()
+
+            return jsonify({
+                "message": "You are already registered!",
+                "id": user["id"]
+            })
+
+    new_user = {
+        "id": user_id,
+        "ip": ip
+    }
+
+    users.append(new_user)
+
+    with open(USERS_FILE, "w", encoding="utf-8") as file:
+        json.dump(users, file, indent=4)
+
+    register_user()
+
+    return jsonify({
+        "message": "Registration successful!",
+        "id": user_id
+    })
+
+
+@app.route("/api/chat/send", methods=["POST"])
+def chat_send():
+    register_user()
+
+    data = request.get_json()
+
+    if not data:
+        return jsonify({
+            "error": "Invalid JSON"
+        }), 400
+
+    message = data.get("message", "").strip()
+
+    if not message:
+        return jsonify({
+            "error": "Empty message"
+        }), 400
+
+    ip = request.remote_addr
+    user_id = ip.split(".")[-1]
+
+    ping_match = re.search(
+        r'@ID<(\d+)>',
+        message
+    )
+
+    if ping_match:
+        target_id = ping_match.group(1)
+
+        if target_id != user_id:
+            if target_id not in notifications:
+                notifications[target_id] = []
+
+            notification = {
+                "from": user_id,
+                "message": message,
+                "time": datetime.now().strftime("%H:%M:%S")
+            }
+
+            notifications[target_id].append(notification)
+
+            print(
+                f"PING: User {user_id} -> User {target_id}"
+            )
+
+    now = datetime.now().strftime("%H:%M:%S")
+
+    line = f"[{now}] ({user_id}) {message}\n"
+
+    chat_file = get_chat_file()
+
+    with open(chat_file, "a", encoding="utf-8") as file:
+        file.write(line)
+
+    return jsonify({
+        "status": "sent"
+    })
+
+
+@app.route("/api/chat/history")
+def chat_history():
+    register_user()
+
+    chat_file = get_chat_file()
+
+    if not os.path.exists(chat_file):
+        return jsonify([])
+
+    with open(chat_file, "r", encoding="utf-8") as file:
+        messages = file.readlines()
+
+    return jsonify(messages)
+
+
+@app.route("/api/notifications")
+def get_notifications():
+    register_user()
+
+    client_ip = request.remote_addr
+    users = load_users()
+
+    current_user = None
+
+    for user in users:
+        if user["ip"] == client_ip:
+            current_user = user
+            break
+
+    if not current_user:
+        return jsonify([])
+
+    user_id = current_user["id"]
+
+    user_notifications = notifications.get(
+        user_id,
+        []
+    )
+
+    notifications[user_id] = []
+
+    return jsonify(user_notifications)
+
+
+@app.route("/api/status")
+def status():
+    register_user()
+
+    now = time.time()
+
+    active = {
+        ip: last_seen
+        for ip, last_seen in active_users.items()
+        if now - last_seen <= ACTIVE_TIMEOUT
+    }
+
+    active_users.clear()
+    active_users.update(active)
+
+    users = load_users()
+
+    return jsonify({
+        "active_users": len(active_users),
+        "registered_users": len(users)
+    })
+
+
+@app.route("/upload", methods=["POST"])
+def upload():
+    register_user()
+
+    if "file" not in request.files:
+        return jsonify({
+            "error": "No file uploaded"
+        }), 400
+
+    file = request.files["file"]
+
+    target = request.form.get("target")
+
+    if not target:
+        return jsonify({
+            "error": "No target user selected"
+        }), 400
+
+    if file.filename == "":
+        return jsonify({
+            "error": "No selected file"
+        }), 400
+
+    users = load_users()
+
+    target_exists = any(
+        user["id"] == target
+        for user in users
+    )
+
+    if not target_exists:
+        return jsonify({
+            "error": "Target user does not exist"
+        }), 404
+
+    inbox_dir = os.path.join(
+        UPLOAD_FOLDER,
+        "inbox",
+        target
+    )
+
+    os.makedirs(
+        inbox_dir,
+        exist_ok=True
+    )
+
+    filepath = os.path.join(
+        inbox_dir,
+        file.filename
+    )
+
+    file.save(filepath)
+
+    return jsonify({
+        "message": f"File sent to User {target}!",
+        "filename": file.filename,
+        "target": target
+    })
+
+
+#====================
+# API: PUSHUP SERVICE
+#=========================
+@app.route("/api/pushup/inbox")
+def pushup_inbox():
+    register_user()
+
+    client_ip = request.remote_addr
+
+    users = load_users()
+
+    current_user = next(
+        (
+            user
+            for user in users
+            if user["ip"] == client_ip
+        ),
+        None
+    )
+
+    if not current_user:
+        return jsonify({
+            "error": "User not registered"
+        }), 403
+
+    user_id = current_user["id"]
+
+    inbox_dir = os.path.join(
+        UPLOAD_FOLDER,
+        "inbox",
+        user_id
+    )
+
+    if not os.path.exists(inbox_dir):
+        return jsonify([])
+
+    files = []
+
+    for filename in os.listdir(inbox_dir):
+
+        filepath = os.path.join(
+            inbox_dir,
+            filename
+        )
+
+        if os.path.isfile(filepath):
+
+            files.append({
+                "filename": filename,
+                "url": (
+                    f"/uploads/inbox/"
+                    f"{user_id}/"
+                    f"{filename}"
+                )
+            })
+
+    return jsonify(files)
+
+
+# ============================================================
+# BROTERNET: POSTS API
+# ============================================================
+
+BROTERNET_POSTS_DIR = "broternet/.posts"
+
+os.makedirs(
+    BROTERNET_POSTS_DIR,
+    exist_ok=True
+)
+
+
+@app.route(
+    "/api/broternet/posts",
+    methods=["GET", "POST"]
+)
+def broternet_posts():
+    register_user()
+
+    # ========================================================
+    # CREATE POST
+    # ========================================================
+    if request.method == "POST":
+
+        data = request.get_json()
+
+        if not data:
+            return jsonify({
+                "error": "Invalid JSON"
+            }), 400
+
+        title = data.get(
+            "title",
+            ""
+        ).strip()
+
+        content = data.get(
+            "content",
+            ""
+        ).strip()
+
+        if not title or not content:
+            return jsonify({
+                "error":
+                    "Title and content are required"
+            }), 400
+
+        client_ip = request.remote_addr
+
+        users = load_users()
+
+        user_id = client_ip.split(".")[-1]
+
+        for user in users:
+            if user["ip"] == client_ip:
+                user_id = user["id"]
+                break
+
+        date = datetime.now().strftime(
+            "%d-%m-%Y"
+        )
+
+        post = {
+            "title": title,
+            "content": content,
+            "attachment": None,
+            "date": date,
+            "id": user_id
+        }
+
+        filename = (
+            f"{date}-{user_id}.json"
+        )
+
+        filepath = os.path.join(
+            BROTERNET_POSTS_DIR,
+            filename
+        )
+
+        with open(
+            filepath,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            json.dump(
+                post,
+                file,
+                indent=4,
+                ensure_ascii=False
+            )
+
+        return jsonify({
+            "message": "Post published!",
+            "post": post
+        })
+
+
+    # ========================================================
+    # LOAD POSTS
+    # ========================================================
+
+    posts = []
+
+    for filename in os.listdir(
+        BROTERNET_POSTS_DIR
+    ):
+
+        if not filename.endswith(".json"):
+            continue
+
+        filepath = os.path.join(
+            BROTERNET_POSTS_DIR,
+            filename
+        )
+
+        try:
+
+            with open(
+                filepath,
+                "r",
+                encoding="utf-8"
+            ) as file:
+
+                post = json.load(file)
+
+                posts.append(post)
+
+        except (
+            json.JSONDecodeError,
+            OSError
+        ):
+
+            print(
+                f"Unable to load post: {filename}"
+            )
+
+    return jsonify(posts)
+
+# ============================================================
+# BROTERNET: MEDIA UPLOAD
+# ============================================================
+
+BROTERNET_MEDIA_DIR = "uploads/broternet"
+
+BROTERNET_MUSIC_UPLOAD_DIR = os.path.join(
+    BROTERNET_MEDIA_DIR,
+    "music"
+)
+
+BROTERNET_VIDEO_UPLOAD_DIR = os.path.join(
+    BROTERNET_MEDIA_DIR,
+    "video"
+)
+
+
+os.makedirs(
+    BROTERNET_MUSIC_UPLOAD_DIR,
+    exist_ok=True
+)
+
+os.makedirs(
+    BROTERNET_VIDEO_UPLOAD_DIR,
+    exist_ok=True
+)
+
+
+# ============================================================
+# MUSIC UPLOAD
+# ============================================================
+
+@app.route(
+    "/api/broternet/music/upload",
+    methods=["POST"]
+)
+def broternet_music_upload():
+    register_user()
+
+    if "file" not in request.files:
+        return jsonify({
+            "error": "No file uploaded"
+        }), 400
+
+    file = request.files["file"]
+
+    if file.filename == "":
+        return jsonify({
+            "error": "No selected file"
+        }), 400
+
+
+    allowed_types = {
+        "audio/mpeg",
+        "audio/mp3"
+    }
+
+
+    if (
+        not file.filename.lower().endswith(".mp3")
+        or file.mimetype not in allowed_types
+    ):
+        return jsonify({
+            "error": "Only MP3 files are allowed"
+        }), 400
+
+
+    filename = (
+        f"{int(time.time())}_"
+        f"{file.filename}"
+    )
+
+
+    filepath = os.path.join(
+        BROTERNET_MUSIC_UPLOAD_DIR,
+        filename
+    )
+
+    file.save(filepath)
+
+
+    return jsonify({
+
+        "message": "Music uploaded!",
+
+        "url": (
+            "/uploads/broternet/music/"
+            + filename
+        )
+
+    })
+
+
+# ============================================================
+# VIDEO UPLOAD
+# ============================================================
+
+@app.route(
+    "/api/broternet/video/upload",
+    methods=["POST"]
+)
+def broternet_video_upload():
+    register_user()
+
+    if "file" not in request.files:
+        return jsonify({
+            "error": "No file uploaded"
+        }), 400
+
+    file = request.files["file"]
+
+    if file.filename == "":
+        return jsonify({
+            "error": "No selected file"
+        }), 400
+
+
+    allowed_types = {
+        "video/mp4"
+    }
+
+
+    if (
+        not file.filename.lower().endswith(".mp4")
+        or file.mimetype not in allowed_types
+    ):
+        return jsonify({
+            "error": "Only MP4 files are allowed"
+        }), 400
+
+
+    filename = (
+        f"{int(time.time())}_"
+        f"{file.filename}"
+    )
+
+
+    filepath = os.path.join(
+        BROTERNET_VIDEO_UPLOAD_DIR,
+        filename
+    )
+
+    file.save(filepath)
+
+
+    return jsonify({
+
+        "message": "Video uploaded!",
+
+        "url": (
+            "/uploads/broternet/video/"
+            + filename
+        )
+
+    })
+
+# ============================================================
+# BROTERNET: VIDEOS API
+# ============================================================
+
+BROTERNET_VIDEOS_DIR = "broternet/.videos"
+
+os.makedirs(
+    BROTERNET_VIDEOS_DIR,
+    exist_ok=True
+)
+
+
+@app.route(
+    "/api/broternet/videos",
+    methods=["GET", "POST"]
+)
+def broternet_videos():
+    register_user()
+
+    if request.method == "POST":
+
+        data = request.get_json()
+
+        if not data:
+            return jsonify({
+                "error": "Invalid JSON"
+            }), 400
+
+        title = data.get(
+            "title",
+            ""
+        ).strip()
+
+        video_type = data.get(
+            "type",
+            ""
+        ).strip()
+
+        source = data.get(
+            "source",
+            ""
+        ).strip()
+
+        if not title or not source:
+            return jsonify({
+                "error":
+                    "Title and video source are required"
+            }), 400
+
+        if video_type not in [
+            "local",
+            "embed"
+        ]:
+            return jsonify({
+                "error":
+                    "Video type must be local or embed"
+            }), 400
+
+        client_ip = request.remote_addr
+        users = load_users()
+
+        user_id = client_ip.split(".")[-1]
+
+        for user in users:
+            if user["ip"] == client_ip:
+                user_id = user["id"]
+                break
+
+        date = datetime.now().strftime(
+            "%d-%m-%Y"
+        )
+
+        timestamp = datetime.now().strftime(
+            "%H%M%S"
+        )
+
+        video = {
+            "title": title,
+            "type": video_type,
+            "source": source,
+            "date": date,
+            "id": user_id
+        }
+
+        filename = (
+            f"{date}-{user_id}-{timestamp}.json"
+        )
+
+        filepath = os.path.join(
+            BROTERNET_VIDEOS_DIR,
+            filename
+        )
+
+        with open(
+            filepath,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            json.dump(
+                video,
+                file,
+                indent=4,
+                ensure_ascii=False
+            )
+
+        return jsonify({
+            "message": "Video published!",
+            "video": video
+        })
+
+
+    videos = []
+
+    for filename in os.listdir(
+        BROTERNET_VIDEOS_DIR
+    ):
+
+        if not filename.endswith(".json"):
+            continue
+
+        filepath = os.path.join(
+            BROTERNET_VIDEOS_DIR,
+            filename
+        )
+
+        try:
+
+            with open(
+                filepath,
+                "r",
+                encoding="utf-8"
+            ) as file:
+
+                video = json.load(file)
+
+                videos.append(video)
+
+        except (
+            json.JSONDecodeError,
+            OSError
+        ):
+
+            print(
+                f"Unable to load video: {filename}"
+            )
+
+    return jsonify(videos)
+
+
+# ============================================================
+# BROTERNET: MUSIC API
+# ============================================================
+
+BROTERNET_MUSIC_DIR = "broternet/.music"
+
+os.makedirs(
+    BROTERNET_MUSIC_DIR,
+    exist_ok=True
+)
+
+
+@app.route(
+    "/api/broternet/music",
+    methods=["GET", "POST"]
+)
+def broternet_music():
+    register_user()
+
+    if request.method == "POST":
+
+        data = request.get_json()
+
+        if not data:
+            return jsonify({
+                "error": "Invalid JSON"
+            }), 400
+
+        title = data.get(
+            "title",
+            ""
+        ).strip()
+
+        artist = data.get(
+            "artist",
+            ""
+        ).strip()
+
+        source = data.get(
+            "source",
+            ""
+        ).strip()
+
+        if not title or not source:
+            return jsonify({
+                "error":
+                    "Title and music source are required"
+            }), 400
+
+        client_ip = request.remote_addr
+        users = load_users()
+
+        user_id = client_ip.split(".")[-1]
+
+        for user in users:
+            if user["ip"] == client_ip:
+                user_id = user["id"]
+                break
+
+        date = datetime.now().strftime(
+            "%d-%m-%Y"
+        )
+
+        timestamp = datetime.now().strftime(
+            "%H%M%S"
+        )
+
+        music = {
+            "title": title,
+            "artist": artist,
+            "source": source,
+            "date": date,
+            "id": user_id
+        }
+
+        filename = (
+            f"{date}-{user_id}-{timestamp}.json"
+        )
+
+        filepath = os.path.join(
+            BROTERNET_MUSIC_DIR,
+            filename
+        )
+
+        with open(
+            filepath,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            json.dump(
+                music,
+                file,
+                indent=4,
+                ensure_ascii=False
+            )
+
+        return jsonify({
+            "message": "Music published!",
+            "music": music
+        })
+
+
+    music_list = []
+
+    for filename in os.listdir(
+        BROTERNET_MUSIC_DIR
+    ):
+
+        if not filename.endswith(".json"):
+            continue
+
+        filepath = os.path.join(
+            BROTERNET_MUSIC_DIR,
+            filename
+        )
+
+        try:
+
+            with open(
+                filepath,
+                "r",
+                encoding="utf-8"
+            ) as file:
+
+                music = json.load(file)
+
+                music_list.append(music)
+
+        except (
+            json.JSONDecodeError,
+            OSError
+        ):
+
+            print(
+                f"Unable to load music: {filename}"
+            )
+
+    return jsonify(music_list)
+
+
+# ============================================================
+# BROTERNET: IMAGE POSTS API
+# ============================================================
+
+BROTERNET_IMAGES_DIR = "broternet/.images"
+BROTERNET_IMAGE_UPLOAD_DIR = (
+    "broternet/uploads/images"
+)
+
+ALLOWED_IMAGE_EXTENSIONS = {
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".webp",
+    ".gif"
+}
+
+
+os.makedirs(
+    BROTERNET_IMAGES_DIR,
+    exist_ok=True
+)
+
+os.makedirs(
+    BROTERNET_IMAGE_UPLOAD_DIR,
+    exist_ok=True
+)
+
+
+@app.route(
+    "/api/broternet/images",
+    methods=["GET", "POST"]
+)
+def broternet_images():
+
+    register_user()
+
+    # ----------------------------------------
+    # GET IMAGE POSTS
+    # ----------------------------------------
+
+    if request.method == "GET":
+
+        images = []
+
+        for filename in os.listdir(
+            BROTERNET_IMAGES_DIR
+        ):
+
+            if not filename.endswith(".json"):
+                continue
+
+            filepath = os.path.join(
+                BROTERNET_IMAGES_DIR,
+                filename
+            )
+
+            try:
+
+                with open(
+                    filepath,
+                    "r",
+                    encoding="utf-8"
+                ) as file:
+
+                    image = json.load(file)
+
+                    images.append(image)
+
+            except (
+                OSError,
+                json.JSONDecodeError
+            ):
+
+                print(
+                    f"Unable to load image post: "
+                    f"{filename}"
+                )
+
+        return jsonify(images)
+
+
+    # ----------------------------------------
+    # CREATE IMAGE POST
+    # ----------------------------------------
+
+    data = request.get_json()
+
+    if not data:
+
+        return jsonify({
+            "error": "Invalid JSON"
+        }), 400
+
+
+    title = data.get(
+        "title",
+        ""
+    ).strip()
+    content = data.get(
+        "content",
+        ""
+    ).strip()
+
+    source = data.get(
+        "source",
+        ""
+    ).strip()
+
+
+    if not title or not source:
+
+        return jsonify({
+            "error":
+                "Title and image source are required"
+        }), 400
+
+
+    client_ip = request.remote_addr
+
+    users = load_users()
+
+    user_id = client_ip.split(".")[-1]
+
+
+    for user in users:
+
+        if user["ip"] == client_ip:
+
+            user_id = user["id"]
+
+            break
+
+
+    date = datetime.now().strftime(
+        "%d-%m-%Y"
+    )
+
+
+    image_post = {
+        "title": title,
+        "content":content,
+        "source": source,
+        "date": date,
+        "id": user_id
+    }
+
+
+    timestamp = datetime.now().strftime(
+        "%H%M%S"
+    )
+
+
+    filename = (
+        f"{date}-{user_id}-{timestamp}.json"
+    )
+
+
+    filepath = os.path.join(
+        BROTERNET_IMAGES_DIR,
+        filename
+    )
+
+
+    with open(
+        filepath,
+        "w",
+        encoding="utf-8"
+    ) as file:
+
+        json.dump(
+            image_post,
+            file,
+            indent=4,
+            ensure_ascii=False
+        )
+
+
+    return jsonify({
+        "message": "Image post published!",
+        "image": image_post
+    })
+
+
+# ============================================================
+# IMAGE UPLOAD
+# ============================================================
+
+@app.route(
+    "/api/broternet/images/upload",
+    methods=["POST"]
+)
+def upload_broternet_image():
+
+    register_user()
+
+
+    if "file" not in request.files:
+
+        return jsonify({
+            "error": "No image uploaded"
+        }), 400
+
+
+    file = request.files["file"]
+
+
+    if file.filename == "":
+
+        return jsonify({
+            "error": "No selected image"
+        }), 400
+
+
+    extension = os.path.splitext(
+        file.filename
+    )[1].lower()
+
+
+    if extension not in ALLOWED_IMAGE_EXTENSIONS:
+
+        return jsonify({
+            "error":
+                "Only PNG, JPG, JPEG, WEBP and GIF "
+                "are allowed"
+        }), 400
+
+
+    client_ip = request.remote_addr
+
+    user_id = client_ip.split(".")[-1]
+
+    users = load_users()
+
+
+    for user in users:
+
+        if user["ip"] == client_ip:
+
+            user_id = user["id"]
+
+            break
+
+
+    timestamp = datetime.now().strftime(
+        "%Y%m%d-%H%M%S"
+    )
+
+
+    filename = (
+        f"{user_id}-{timestamp}{extension}"
+    )
+
+
+    filepath = os.path.join(
+        BROTERNET_IMAGE_UPLOAD_DIR,
+        filename
+    )
+
+
+    file.save(filepath)
+
+
+    url = (
+        "/broternet/uploads/images/"
+        + filename
+    )
+
+
+    return jsonify({
+        "message": "Image uploaded!",
+        "url": url
+    })
+
+
+# ============================================================
+# NETWORK DISCOVERY
+# ============================================================
+
+@app.route(
+    "/api/network/devices"
+)
+def network_devices():
+
+    register_user()
+
+    try:
+
+        result = subprocess.run(
+            [
+                "ip",
+                "neigh"
+            ],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+
+    except Exception as error:
+
+        return jsonify({
+            "error": str(error)
+        }), 500
+
+
+    devices = []
+
+
+    for line in result.stdout.splitlines():
+
+        parts = line.split()
+
+
+        if len(parts) < 2:
+            continue
+
+
+        ip = parts[0]
+        if ":" in ip:
+            continue
+        state = parts[-1]
+
+
+        device = {
+            "ip": ip,
+            "state": state
+        }
+
+
+        if "lladdr" in parts:
+
+            mac_index = parts.index(
+                "lladdr"
+            )
+
+
+            if mac_index + 1 < len(parts):
+
+                device["mac"] = (
+                    parts[mac_index + 1]
+                )
+
+
+        if "dev" in parts:
+
+            dev_index = parts.index(
+                "dev"
+            )
+
+
+            if dev_index + 1 < len(parts):
+
+                device["interface"] = (
+                    parts[dev_index + 1]
+                )
+
+
+        devices.append(device)
+
+
+    return jsonify(devices)
+
+@app.route("/")
+def home():
+    register_user()
+
+    return send_from_directory(
+        ".",
+        "index.html"
+    )
+
+
+@app.route("/<path:filename>")
+def static_files(filename):
+    register_user()
+
+    return send_from_directory(
+        ".",
+        filename
+    )
+
+
+if __name__ == "__main__":
+    print("BRO NETWORK BACKEND ONLINE")
+
+    app.run(
+        host="0.0.0.0",
+        port=8080
+    )

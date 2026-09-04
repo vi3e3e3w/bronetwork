@@ -1,0 +1,230 @@
+/* =========================
+STATUS
+========================= */
+
+.status-main {
+
+padding-top:
+    70px;
+
+}
+
+.status-title {
+
+margin-bottom:
+    45px;
+
+}
+
+.status-title h1 {
+
+margin:
+    0 0 15px;
+
+}
+
+.status-title > p {
+
+color:
+    var(--muted);
+
+font-size:
+    16px;
+
+}
+
+/* =========================
+STATS
+========================= */
+
+.stats {
+
+display:
+    grid;
+
+grid-template-columns:
+    repeat(2, 1fr);
+
+gap:
+    20px;
+
+margin-bottom:
+    30px;
+
+}
+
+.stat {
+
+padding:
+    30px;
+
+border:
+    1px solid var(--line);
+
+background:
+    rgba(17, 21, 27, 0.65);
+
+}
+
+.stat h2 {
+
+margin:
+    0 0 8px;
+
+color:
+    var(--accent);
+
+font-size:
+    48px;
+
+}
+
+.stat p {
+
+margin:
+    0;
+
+color:
+    var(--muted);
+
+font-size:
+    11px;
+
+letter-spacing:
+    2px;
+
+}
+
+/* =========================
+SYSTEM PANEL
+========================= */
+
+.system-panel {
+
+border:
+    1px solid var(--line);
+
+background:
+    rgba(17, 21, 27, 0.65);
+
+}
+
+.panel-title {
+
+padding:
+    20px;
+
+border-bottom:
+    1px solid var(--line);
+
+font-size:
+    11px;
+
+letter-spacing:
+    2px;
+
+color:
+    var(--muted);
+
+}
+
+.status-item {
+
+display:
+    flex;
+
+justify-content:
+    space-between;
+
+padding:
+    20px;
+
+border-bottom:
+    1px solid var(--line);
+
+}
+
+.status-item {
+
+border-bottom:
+    none;
+
+}
+
+.online {
+
+color:
+    var(--accent);
+
+font-size:
+    12px;
+
+}
+
+.offline {
+
+color:
+    #ff6b6b;
+
+font-size:
+    12px;
+
+}
+
+/*============================
+  GNU nano 8.7.1                brodiscover.css                          
+    BROPROMPT
+========================*/
+#bro-prompt input {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 12px;
+
+    margin-top: 15px;
+
+    background: var(--bg);
+
+    color: var(--text);
+
+    border: 1px solid var(--accent);
+
+    outline: none;
+
+    font-family: inherit;
+
+}
+#bro-prompt input:focus {
+
+    box-shadow:
+        0 0 12px
+        rgba(103, 232, 166, 0.35);
+
+}
+
+/* =========================
+MOBILE
+========================= */
+
+@media (
+max-width: 700px
+) {
+
+.stats {
+
+    grid-template-columns:
+        1fr;
+
+}
+
+
+.status-item {
+
+    gap:
+        20px;
+
+}
+
+}

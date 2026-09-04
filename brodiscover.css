@@ -1,0 +1,295 @@
+/* =========================
+   BRODISCOVER
+========================= */
+
+.discover-main {
+
+    padding-top:
+        80px;
+
+}
+
+
+.discover-hero {
+
+    max-width:
+        700px;
+
+    margin-bottom:
+        60px;
+
+}
+
+
+.discover-hero h1 {
+
+    font-size:
+        clamp(
+            42px,
+            6vw,
+            72px
+        );
+
+    margin:
+        0 0 20px;
+
+}
+
+
+.discover-hero > p:last-child {
+
+    color:
+        var(--muted);
+
+    font-size:
+        17px;
+
+    line-height:
+        1.6;
+
+}
+
+
+/* =========================
+   CONTROLS
+========================= */
+
+.discover-controls {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    margin-bottom:
+        20px;
+
+}
+
+
+.network-status {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    color:
+        var(--muted);
+
+    font-size:
+        11px;
+
+    letter-spacing:
+        2px;
+
+}
+
+
+.network-status span {
+
+    width:
+        8px;
+
+    height:
+        8px;
+
+    border-radius:
+        50%;
+
+    background:
+        var(--accent);
+
+    box-shadow:
+
+        0 0 12px
+        rgba(103, 232, 166, 0.8);
+
+}
+
+
+/* =========================
+   TABLE
+========================= */
+
+.discover-table {
+
+    width:
+        100%;
+
+    border:
+        1px solid var(--line);
+
+    overflow-x:
+        auto;
+
+}
+
+
+.discover-row {
+
+    display:
+        grid;
+
+    grid-template-columns:
+
+        70px
+        1.4fr
+        1fr
+        1.4fr
+        120px;
+
+    min-width:
+        760px;
+
+    border-bottom:
+        1px solid var(--line);
+
+}
+
+
+.discover-row:last-child {
+
+    border-bottom:
+        none;
+
+}
+
+
+.discover-row > div {
+
+    padding:
+        18px 16px;
+
+    border-right:
+        1px solid var(--line);
+
+    font-family:
+        monospace;
+
+    font-size:
+        13px;
+
+}
+
+
+.discover-row > div:last-child {
+
+    border-right:
+        none;
+
+}
+
+
+.discover-head {
+
+    background:
+        var(--bg-soft);
+
+}
+
+
+.discover-head > div {
+
+    color:
+        var(--muted);
+
+    font-size:
+        11px;
+
+    letter-spacing:
+        1.5px;
+
+}
+
+/*=========================
+    BROPROMPT
+========================*/
+#bro-prompt input {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 12px;
+
+    margin-top: 15px;
+
+    background: var(--bg);
+
+    color: var(--text);
+
+    border: 1px solid var(--accent);
+
+    outline: none;
+
+    font-family: inherit;
+
+}
+#bro-prompt input:focus {
+
+    box-shadow:
+        0 0 12px
+        rgba(103, 232, 166, 0.35);
+
+}
+
+
+/* =========================
+   STATES
+========================= */
+
+.device-reachable {
+
+    color:
+        var(--accent);
+
+}
+
+
+.device-stale {
+
+    color:
+        var(--muted);
+
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (
+    max-width: 700px
+) {
+
+    .discover-main {
+
+        padding-top:
+            60px;
+
+    }
+
+
+    .discover-controls {
+
+        align-items:
+            flex-start;
+
+        gap:
+            20px;
+
+        flex-direction:
+            column;
+
+    }
+
+}

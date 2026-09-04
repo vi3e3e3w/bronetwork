@@ -1,0 +1,366 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Bro Network</title>
+
+<link
+    rel="stylesheet"
+    href="style.css"
+>
+
+</head>
+
+<body>
+
+<!-- BACKGROUND VECTOR -->
+
+<div class="vector-field" id="vector-field"></div>
+
+
+<!-- PAGE -->
+
+<div class="app">
+
+
+    <!-- HEADER -->
+
+    <header>
+
+        <div class="brand">
+
+            <div class="logo-dot"></div>
+
+              <img
+        src="logo.svg"
+        alt="Bro Network"
+        class="brand-logo"
+    >
+
+        </div>
+
+
+        <nav>
+
+            <a
+                class="active"
+                href="/"
+            >
+                Home
+            </a>
+
+            <a href="lchat.html">
+                Local Chat
+            </a>
+
+        </nav>
+
+
+        <button
+            class="user-id"
+            onclick="login()"
+        >
+            ID
+        </button>
+
+    </header>
+
+
+    <!-- MAIN -->
+
+    <main>
+
+
+        <!-- HERO -->
+
+        <section class="hero">
+
+            <p class="eyebrow">
+                LOCAL NETWORK PLATFORM
+            </p>
+
+
+            <h1>
+
+                The first local network
+
+                <span>
+                    from an old computer
+                </span>
+
+                <span>
+                    and legacy Router
+                </span>
+
+            </h1>
+
+
+            <p class="welcome">
+
+                Welcome to
+                <strong>Bro Network.</strong>
+
+            </p>
+
+        </section>
+
+
+        <!-- ACTIONS -->
+
+        <section class="section">
+
+            <p class="section-title">
+
+                ACTION
+
+            </p>
+
+
+            <div class="button-row">
+
+                <button
+                    onclick="signup()"
+                >
+                    Sign Up
+                </button>
+
+
+                <button
+                    class="secondary"
+                    onclick="getout()"
+                >
+                    Let me out!
+                </button>
+
+
+                <a
+                    href="broternet/index.html"
+                >
+
+                    <button class="accent">
+
+                        Broternet
+
+                    </button>
+
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- SERVICES -->
+
+        <section class="section">
+
+            <p class="section-title">
+
+                SERVICES
+
+            </p>
+
+
+            <div class="services-grid">
+
+
+                <a
+                    href="lchat.html"
+                    class="service"
+                >
+
+                    <span>💬</span>
+
+                    <div>
+
+                        <strong>
+                            Local Chat
+                        </strong>
+
+                        <small>
+                            Talk locally
+                        </small>
+
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="status.html"
+                    class="service"
+                >
+
+                    <span>📊</span>
+
+                    <div>
+
+                        <strong>
+                            Status
+                        </strong>
+
+                        <small>
+                            Server status
+                        </small>
+
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="brodiscover.html"
+                    class="service"
+                >
+
+                    <span>🔎</span>
+
+                    <div>
+
+                        <strong>
+                            BroDiscover
+                        </strong>
+
+                        <small>
+                            Discover devices
+                        </small>
+
+                    </div>
+
+                </a>
+
+
+                <a
+                    href="pushup.html"
+                    class="service"
+                >
+
+                    <span>📁</span>
+
+                    <div>
+
+                        <strong>
+                            PushUp
+                        </strong>
+
+                        <small>
+                            Local files
+                        </small>
+
+                    </div>
+
+                </a>
+
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <span>
+
+            BRO NETWORK
+
+        </span>
+
+
+        <span>
+
+            NO INTERNET REQUIRED
+
+        </span>
+
+    </footer>
+
+
+</div>
+
+<div id="bro-dialog" class="bro-dialog">
+
+    <div class="bro-dialog-box">
+
+        <div
+            id="bro-dialog-content"
+            class="bro-dialog-content"
+        >
+            Content
+        </div>
+
+        <div class="bro-dialog-actions">
+
+            <button
+                id="bro-dialog-opt1"
+            >
+                OK
+            </button>
+
+            <button
+                id="bro-dialog-opt2"
+                class="secondary"
+            >
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+<div id="bro-prompt" class="bro-dialog bro-prompt">
+
+    <div class="bro-dialog-box">
+
+        <div
+            id="bro-prompt-content"
+            class="bro-dialog-content"
+        >
+        </div>
+
+        <input
+            id="bro-prompt-input"
+            type="text"
+            autocomplete="off"
+        >
+
+        <div class="bro-dialog-actions">
+
+            <button id="bro-prompt-ok">
+                OK
+            </button>
+
+            <button
+                id="bro-prompt-cancel"
+                class="secondary"
+            >
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+
+</html>

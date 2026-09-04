@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>BroDiscover | Bro Network</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="brodiscover.css"
+    >
+
+</head>
+
+
+<body>
+
+<div class="app">
+
+
+    <!-- HEADER -->
+
+    <header>
+
+        <div class="brand">
+
+            <div class="logo-dot"></div>
+
+            <span>BRO NETWORK</span>
+
+        </div>
+
+
+        <nav>
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="lchat.html">
+                Local Chat
+            </a>
+
+            <a
+                href="brodiscover.html"
+                class="active"
+            >
+                Discover
+            </a>
+
+        </nav>
+
+
+        <button
+            class="user-id"
+            onclick="login()"
+        >
+            ID
+        </button>
+
+    </header>
+
+
+    <!-- MAIN -->
+
+    <main class="discover-main">
+
+
+        <section class="discover-hero">
+
+            <p class="eyebrow">
+
+                NETWORK DISCOVERY
+
+            </p>
+
+
+            <h1>
+
+                BroDiscover
+
+            </h1>
+
+
+            <p>
+
+                Discover devices visible
+                on your local network.
+
+            </p>
+
+        </section>
+
+
+        <!-- CONTROLS -->
+
+        <div class="discover-controls">
+
+            <button
+                onclick="loadDevices()"
+            >
+
+                ↻ Refresh
+
+            </button>
+
+
+            <div class="network-status">
+
+                <span></span>
+
+                NETWORK ACTIVE
+
+            </div>
+
+        </div>
+
+
+        <!-- DEVICE TABLE -->
+
+        <div class="discover-table">
+
+
+            <div
+                class="discover-row discover-head"
+            >
+
+                <div>ID</div>
+
+                <div>IP ADDRESS</div>
+
+                <div>INTERFACE</div>
+
+                <div>MAC ADDRESS</div>
+
+                <div>STATE</div>
+
+            </div>
+
+
+            <div
+                id="device-list"
+            >
+
+                <!-- JS inserts devices here -->
+
+            </div>
+
+
+        </div>
+
+
+    </main>
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <span>
+            BRO NETWORK
+        </span>
+
+        <span>
+            NO INTERNET REQUIRED
+        </span>
+
+    </footer>
+
+
+</div>
+
+<!-- BRO DIALOG -->
+
+<div id="bro-dialog" class="bro-dialog">
+
+    <div class="bro-dialog-box">
+
+        <div
+            id="bro-dialog-content"
+            class="bro-dialog-content"
+        ></div>
+
+        <div class="bro-dialog-actions">
+
+            <button id="bro-dialog-opt1">
+                OK
+            </button>
+
+            <button id="bro-dialog-opt2">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- BRO PROMPT -->
+
+<div id="bro-prompt" class="bro-dialog">
+
+    <div class="bro-dialog-box">
+
+        <div
+            id="bro-prompt-content"
+            class="bro-dialog-content"
+        ></div>
+
+        <input
+            id="bro-prompt-input"
+            type="text"
+            autocomplete="off"
+        >
+
+        <div class="bro-dialog-actions">
+
+            <button id="bro-prompt-ok">
+                OK
+            </button>
+
+            <button id="bro-prompt-cancel">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+
+<script src="brodiscover.js"></script>
+
+</body>
+
+</html>

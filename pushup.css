@@ -1,0 +1,290 @@
+/* =========================
+PUSHUP
+========================= */
+
+.pushup-main {
+
+padding-top:
+    70px;
+
+}
+
+.pushup-title {
+
+margin-bottom:
+    45px;
+
+}
+
+.pushup-title h1 {
+
+margin:
+    0 0 15px;
+
+}
+
+.pushup-title > p {
+
+color:
+    var(--muted);
+
+font-size:
+    16px;
+
+}
+
+/* =========================
+STATUS
+========================= */
+
+.pushup-status {
+
+display:
+    flex;
+
+gap:
+    50px;
+
+align-items:
+    center;
+
+margin-bottom:
+    35px;
+
+}
+
+.my-id-box {
+
+display:
+    flex;
+
+flex-direction:
+    column;
+
+gap:
+    8px;
+
+color:
+    var(--muted);
+
+font-size:
+    11px;
+
+letter-spacing:
+    1.5px;
+
+}
+
+.my-id-box b {
+
+color:
+    var(--text);
+
+font-size:
+    24px;
+
+letter-spacing:
+    normal;
+
+}
+
+/* =========================
+PANELS
+========================= */
+
+.transfer-panel,
+.inbox-panel {
+
+border:
+    1px solid var(--line);
+
+background:
+    rgba(17, 21, 27, 0.65);
+
+padding:
+    30px;
+
+margin-bottom:
+    25px;
+
+}
+
+.transfer-panel h2 {
+
+margin-top:
+    0;
+
+}
+
+/* =========================
+FORM
+========================= */
+
+.field-label {
+
+display:
+    block;
+
+margin-top:
+    22px;
+
+margin-bottom:
+    8px;
+
+color:
+    var(--muted);
+
+font-size:
+    11px;
+
+letter-spacing:
+    2px;
+
+}
+
+.transfer-panel select,
+.transfer-panel input[type="file"] {
+
+width:
+    100%;
+
+box-sizing:
+    border-box;
+
+padding:
+    14px;
+
+border:
+    1px solid var(--line);
+
+background:
+    var(--bg);
+
+color:
+    var(--text);
+
+}
+
+.send-file-button {
+
+margin-top:
+    25px;
+
+}
+
+/* =========================
+RESULT
+========================= */
+
+#result {
+
+margin-top:
+    18px;
+
+color:
+    var(--muted);
+
+}
+
+/* =========================
+INBOX
+========================= */
+
+.panel-title {
+
+display:
+    flex;
+
+justify-content:
+    space-between;
+
+padding-bottom:
+    18px;
+
+margin-bottom:
+    20px;
+
+border-bottom:
+    1px solid var(--line);
+
+font-size:
+    12px;
+
+letter-spacing:
+    2px;
+
+}
+
+#inbox {
+
+min-height:
+    80px;
+
+color:
+    var(--muted);
+
+}
+
+/*=========================
+    BROPROMPT
+========================*/
+#bro-prompt input {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 12px;
+
+    margin-top: 15px;
+
+    background: var(--bg);
+
+    color: var(--text);
+
+    border: 1px solid var(--accent);
+
+    outline: none;
+
+    font-family: inherit;
+
+}
+#bro-prompt input:focus {
+
+    box-shadow:
+        0 0 12px
+        rgba(103, 232, 166, 0.35);
+
+}
+
+/* =========================
+MOBILE
+========================= */
+
+@media (
+max-width: 700px
+) {
+
+.pushup-status {
+
+    flex-direction:
+        column;
+
+    align-items:
+        flex-start;
+
+    gap:
+        25px;
+
+}
+
+
+.transfer-panel,
+.inbox-panel {
+
+    padding:
+        20px;
+
+}
+
+}

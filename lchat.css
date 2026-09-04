@@ -1,0 +1,315 @@
+/* =========================
+LOCAL CHAT
+========================= */
+
+.lchat-main {
+
+padding-top:
+    70px;
+
+}
+
+/* =========================
+TITLE
+========================= */
+
+.lchat-title {
+
+margin-bottom:
+    40px;
+
+}
+
+.lchat-title h1 {
+
+margin:
+    0 0 15px;
+
+}
+
+.lchat-title > p {
+
+color:
+    var(--muted);
+
+font-size:
+    16px;
+
+}
+
+/* =========================
+ACTIVE USERS
+========================= */
+
+.active-users {
+
+display:
+    flex;
+
+align-items:
+    baseline;
+
+gap:
+    14px;
+
+margin-bottom:
+    25px;
+
+}
+
+.active-users h2 {
+
+margin:
+    0;
+
+font-size:
+    38px;
+
+color:
+    var(--accent);
+
+}
+
+.active-users span {
+
+color:
+    var(--muted);
+
+font-size:
+    11px;
+
+letter-spacing:
+    2px;
+
+}
+
+/* =========================
+CHAT
+========================= */
+
+.chat {
+
+display:
+    grid;
+
+grid-template-columns:
+    240px 1fr;
+
+min-height:
+    480px;
+
+border:
+    1px solid var(--line);
+
+background:
+    rgba(17, 21, 27, 0.65);
+
+}
+
+/* =========================
+SIDEBAR
+========================= */
+
+.sidebar {
+
+padding:
+    22px;
+
+border-right:
+    1px solid var(--line);
+
+}
+
+.channel-title,
+.offline-title {
+
+font-size:
+    11px;
+
+letter-spacing:
+    2px;
+
+color:
+    var(--muted);
+
+}
+
+.offline-title {
+
+margin-top:
+    25px;
+
+}
+
+.sidebar hr {
+
+border:
+    none;
+
+border-top:
+    1px solid var(--line);
+
+margin:
+    15px 0;
+
+}
+
+.user-list {
+
+display:
+    flex;
+
+flex-direction:
+    column;
+
+gap:
+    8px;
+
+}
+
+/* =========================
+MESSAGES
+========================= */
+
+.messages {
+
+padding:
+    25px;
+
+overflow-y:
+    auto;
+
+font-size:
+    14px;
+
+line-height:
+    1.6;
+
+}
+
+/* =========================
+SEND BOX
+========================= */
+
+.sendbox {
+
+display:
+    flex;
+
+margin-top:
+    12px;
+
+border:
+    1px solid var(--line);
+
+background:
+    var(--bg-soft);
+
+}
+
+.sendbox input {
+
+flex:
+    1;
+
+padding:
+    17px;
+
+border:
+    none;
+
+outline:
+    none;
+
+background:
+    transparent;
+
+color:
+    var(--text);
+
+font-size:
+    14px;
+
+}
+
+.sendbox button {
+
+border:
+    none;
+
+border-left:
+    1px solid var(--line);
+
+background:
+    var(--accent);
+
+color:
+    #07110b;
+
+font-weight:
+    600;
+
+}
+#bro-prompt input {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 12px;
+
+    margin-top: 15px;
+
+    background: var(--bg);
+
+    color: var(--text);
+
+    border: 1px solid var(--accent);
+
+    outline: none;
+
+    font-family: inherit;
+
+}
+#bro-prompt input:focus {
+
+    box-shadow:
+        0 0 12px
+        rgba(103, 232, 166, 0.35);
+
+}
+/* =========================
+MOBILE
+========================= */
+
+@media (
+max-width: 700px
+) {
+
+.chat {
+
+    grid-template-columns:
+        1fr;
+
+}
+
+
+.sidebar {
+
+    border-right:
+        none;
+
+    border-bottom:
+        1px solid var(--line);
+
+}
+
+
+.messages {
+
+    min-height:
+        400px;
+
+}
+
+}

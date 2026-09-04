@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Local Chat | Bro Network</title>
+
+<link
+    rel="stylesheet"
+    href="style.css"
+>
+
+<link
+    rel="stylesheet"
+    href="lchat.css"
+>
+
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- HEADER -->
+
+<header>
+
+    <div class="brand">
+
+        <div class="logo-dot"></div>
+
+        <img
+            src="logo.svg"
+            alt="Bro Network"
+            class="brand-logo"
+        >
+
+    </div>
+
+
+    <nav>
+
+        <a href="index.html">
+            Home
+        </a>
+
+        <a
+            href="lchat.html"
+            class="active"
+        >
+            Local Chat
+        </a>
+
+        <a href="brodiscover.html">
+            Discover
+        </a>
+
+    </nav>
+
+
+    <button
+        class="user-id"
+        onclick="login()"
+    >
+        ID
+    </button>
+
+</header>
+
+
+<!-- MAIN -->
+
+<main class="lchat-main">
+
+
+    <section class="lchat-title">
+
+        <p class="eyebrow">
+            LOCAL COMMUNICATION
+        </p>
+
+
+        <h1>
+            Local Chat
+        </h1>
+
+
+        <p>
+            Talk with people connected
+            to your local network.
+        </p>
+
+    </section>
+
+
+    <!-- ACTIVE USERS -->
+
+    <div class="active-users">
+
+        <h2 class="active-user-count">
+            0
+        </h2>
+
+        <span>
+            ACTIVE USERS
+        </span>
+
+    </div>
+
+
+    <!-- CHAT AREA -->
+
+    <section class="chat">
+
+
+        <!-- SIDEBAR -->
+
+        <aside class="sidebar">
+
+            <div class="channel-title">
+                GENERAL
+            </div>
+
+            <hr>
+
+            <div
+                id="online-users"
+                class="user-list"
+            ></div>
+
+
+            <div class="offline-title">
+                OFFLINE
+            </div>
+
+            <hr>
+
+            <div
+                id="offline-users"
+                class="user-list"
+            ></div>
+
+        </aside>
+
+
+        <!-- MESSAGES -->
+
+        <div
+            class="messages"
+            id="chat-box"
+        >
+
+            Loading messages...
+
+        </div>
+
+
+    </section>
+
+
+    <!-- SEND BOX -->
+
+    <div class="sendbox">
+
+        <input
+            type="text"
+            id="message"
+            placeholder="Send a message..."
+        >
+
+        <button onclick="sendMessage()">
+            Send
+        </button>
+
+    </div>
+
+
+</main>
+
+
+<!-- FOOTER -->
+
+<footer>
+
+    <span>
+        BRO NETWORK
+    </span>
+
+    <span>
+        NO INTERNET REQUIRED
+    </span>
+
+</footer>
+
+</div>
+<!-- BRO DIALOG -->
+
+<div id="bro-dialog" class="bro-dialog">
+
+    <div class="bro-dialog-box">
+
+        <div
+            id="bro-dialog-content"
+            class="bro-dialog-content"
+        ></div>
+
+        <div class="bro-dialog-actions">
+
+            <button id="bro-dialog-opt1">
+                OK
+            </button>
+
+            <button id="bro-dialog-opt2">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- BRO PROMPT -->
+
+<div id="bro-prompt" class="bro-dialog">
+
+    <div class="bro-dialog-box">
+
+        <div
+            id="bro-prompt-content"
+            class="bro-dialog-content"
+        ></div>
+
+        <input
+            id="bro-prompt-input"
+            type="text"
+            autocomplete="off"
+        >
+
+        <div class="bro-dialog-actions">
+
+            <button id="bro-prompt-ok">
+                OK
+            </button>
+
+            <button id="bro-prompt-cancel">
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- MAIN BRO NETWORK LOGIC -->
+
+<script src="script.js"></script>
+
+<!-- LOCAL CHAT LOGIC -->
+
+<script src="lchat.js"></script>
+
+</body>
+
+</html>

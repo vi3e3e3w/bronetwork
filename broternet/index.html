@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<link
+    rel="icon"
+    type="image/svg+xml"
+    href="broternet.svg"
+>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Broternet | Bro Network</title>
+
+<link
+    rel="stylesheet"
+    href="broternet.css"
+>
+
+</head>
+
+<body>
+
+<!-- ================================================= -->
+
+<!-- NAVIGATION -->
+
+<!-- ================================================= -->
+
+<header class="navbar">
+
+<a
+    href="/"
+    class="nav-logo"
+>
+
+    <img
+        src="broternet.svg"
+        alt="Broternet Logo"
+    >
+
+</a>
+
+
+<nav>
+
+    <a href="/">
+        Bro Network
+    </a>
+
+    <a href="#posts">
+        Posts
+    </a>
+
+    <a href="#videos">
+        Video
+    </a>
+
+    <a href="#music">
+        Music
+    </a>
+
+    <a href="#images">
+        Images
+    </a>
+
+</nav>
+
+
+<div class="network-status">
+
+    <span class="status-dot"></span>
+
+    LOCAL
+
+</div>
+
+</header>
+
+
+
+
+<main>
+
+<!-- ================================================= -->
+<!-- HERO -->
+<!-- ================================================= -->
+
+<section class="hero">
+
+    <div class="hero-card">
+
+
+        <p class="eyebrow">
+            BRO NETWORK MEDIA
+        </p>
+
+
+        <img
+            src="broternet.svg"
+            alt="Broternet Logo"
+            class="hero-logo"
+        >
+
+
+        <h1>
+            Meet you at the Net
+        </h1>
+
+
+        <p class="hero-description">
+
+            Posts, videos, music and images
+            shared across your local network.
+
+        </p>
+
+
+        <a
+            href="/"
+            class="back-button"
+        >
+
+            ← BRO NETWORK
+
+        </a>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- ================================================= -->
+<!-- CONTENT -->
+<!-- ================================================= -->
+
+<div class="content-grid">
+
+
+    <!-- ============================================= -->
+    <!-- POSTS -->
+    <!-- ============================================= -->
+
+    <section class="content-section posts-section">
+
+        <div class="section-header">
+
+            <div>
+
+                <p class="section-label">
+                    SOCIAL
+                </p>
+
+                <h2>
+                    Posts
+                </h2>
+
+            </div>
+
+
+            <button
+                id="new-post"
+                type="button"
+                class="add-button"
+            >
+                +
+            </button>
+
+        </div>
+
+
+        <div
+            id="post-form"
+            class="publish-form"
+            style="display: none;"
+        >
+
+            <input
+                type="text"
+                id="post-title"
+                placeholder="Post title"
+            >
+
+
+            <textarea
+                id="post-content"
+                placeholder="Write something..."
+            ></textarea>
+
+
+            <button
+                type="button"
+                onclick="createPost()"
+            >
+                Publish Post
+            </button>
+
+        </div>
+
+
+        <div id="posts">
+
+            Loading posts...
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ============================================= -->
+    <!-- VIDEO -->
+    <!-- ============================================= -->
+
+    <section class="content-section video-section">
+
+        <div class="section-header">
+
+            <div>
+
+                <p class="section-label">
+                    WATCH
+                </p>
+
+                <h2>
+                    Video
+                </h2>
+
+            </div>
+
+
+            <button
+                id="new-video"
+                type="button"
+                class="add-button"
+            >
+                +
+            </button>
+
+        </div>
+
+
+        <div
+            id="video-form"
+            class="publish-form"
+            style="display: none;"
+        >
+
+            <input
+                type="text"
+                id="video-title"
+                placeholder="Video title"
+            >
+
+
+            <label for="video-type">
+
+                VIDEO TYPE
+
+            </label>
+
+
+            <select id="video-type">
+
+                <option value="embed">
+
+                    Embed Video
+
+                </option>
+
+
+                <option value="mp4">
+
+                    Upload MP4
+
+                </option>
+
+            </select>
+
+
+            <div id="embed-container">
+
+                <input
+                    type="text"
+                    id="video-source"
+                    placeholder="Embed URL"
+                >
+
+            </div>
+
+
+            <div
+                id="video-upload-container"
+                style="display: none;"
+            >
+
+                <input
+                    type="file"
+                    id="video-file"
+                    accept="video/mp4,.mp4"
+                >
+
+            </div>
+
+
+            <button
+                type="button"
+                onclick="createVideo()"
+            >
+                Publish Video
+            </button>
+
+        </div>
+
+
+        <div id="videos">
+
+            Loading videos...
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ============================================= -->
+    <!-- MUSIC -->
+    <!-- ============================================= -->
+
+    <section class="content-section music-section">
+
+        <div class="section-header">
+
+            <div>
+
+                <p class="section-label">
+                    LISTEN
+                </p>
+
+                <h2>
+                    Music
+                </h2>
+
+            </div>
+
+
+            <button
+                id="new-music"
+                type="button"
+                class="add-button"
+            >
+                +
+            </button>
+
+        </div>
+
+
+        <div
+            id="music-form"
+            class="publish-form"
+            style="display: none;"
+        >
+
+            <input
+                type="text"
+                id="music-title"
+                placeholder="Song title"
+            >
+
+
+            <input
+                type="text"
+                id="music-artist"
+                placeholder="Artist"
+            >
+
+
+            <label>
+
+                MP3 FILE
+
+            </label>
+
+
+            <input
+                type="file"
+                id="music-file"
+                accept="audio/mpeg,.mp3"
+            >
+
+
+            <button
+                type="button"
+                onclick="createMusic()"
+            >
+                Publish Music
+            </button>
+
+        </div>
+
+
+        <div id="music">
+
+            Loading music...
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ============================================= -->
+    <!-- IMAGES -->
+    <!-- ============================================= -->
+
+    <section class="content-section images-section">
+
+        <div class="section-header">
+
+            <div>
+
+                <p class="section-label">
+                    GALLERY
+                </p>
+
+                <h2>
+                    Images
+                </h2>
+
+            </div>
+
+
+            <button
+                id="new-image"
+                type="button"
+                class="add-button"
+            >
+                +
+            </button>
+
+        </div>
+
+
+        <div
+            id="image-form"
+            class="publish-form"
+            style="display: none;"
+        >
+
+            <input
+                id="image-title"
+                type="text"
+                placeholder="Image title"
+            >
+
+
+            <textarea
+                id="image-content"
+                placeholder="Description (optional)"
+            ></textarea>
+
+
+            <input
+                id="image-file"
+                type="file"
+                accept="image/*"
+            >
+
+
+            <button
+                type="button"
+                onclick="createImagePost()"
+            >
+                Publish Image
+            </button>
+
+        </div>
+
+
+        <div id="images">
+
+            Loading images...
+
+        </div>
+
+    </section>
+
+
+</div>
+
+
+
+<!-- ================================================= -->
+<!-- ABOUT -->
+<!-- ================================================= -->
+
+<section class="about-section">
+
+
+    <p class="eyebrow">
+        ABOUT
+    </p>
+
+
+    <h2>
+        A tiny network inside your network.
+    </h2>
+
+
+    <p>
+
+        Broternet is a media service
+        built on Bro Network.
+
+    </p>
+
+
+    <p>
+
+        Unlike the Internet, Broternet
+        is designed for people connected
+        to the same local network.
+
+    </p>
+
+
+    <div class="changelog">
+
+        <span>
+            SYSTEM STATUS
+        </span>
+
+        <strong>
+            BASIC FUNCTIONS ONLINE
+        </strong>
+
+    </div>
+
+
+</section>
+
+</main>
+
+
+
+
+<footer>
+
+<span>
+    BROTERNET
+</span>
+
+<span>
+    A PRODUCT OF BRO NETWORK
+</span>
+
+<span>
+    NO INTERNET REQUIRED
+</span>
+
+</footer>
+
+
+
+
+<script src="broternet.js"></script>
+
+</body>
+
+</html>
