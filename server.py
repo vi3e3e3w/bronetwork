@@ -709,7 +709,7 @@ def broternet_videos():
             }), 400
 
         if video_type not in [
-            "local",
+            "mp4",
             "embed"
         ]:
             return jsonify({
@@ -1333,7 +1333,135 @@ def lchat_dm(target_id):
         ".",
         "lchat.html"
     )
+'''===========================
+PRIVATE DM CHAT
+=============================
+'''
 
+DM_CHAT_DIR = ".chat-history"
+
+os.makedirs(
+    DM_CHAT_DIR,
+    exist_ok=True
+)
+
+
+def get_dm_file(user_a, user_b):
+
+    ids = sorted([
+        str(user_a),
+        str(user_b)
+    ])
+
+    filename = (
+        f"dm-{ids[0]}-{ids[1]}.txt"
+    )
+
+    return os.path.join(
+        DM_CHAT_DIR,
+        filename
+    )
+
+
+@app.route(
+    "/api/dm/<target_id>",
+    methods=["GET", "POST"]
+)
+def dm_chat(target_id):
+
+    register_user()
+
+    client_ip = request.remote_addr
+    users = load_users()
+
+    current_user = next(
+        (
+            user
+            for user in users
+            if user["ip"] == client_ip
+        ),
+        None
+    )
+
+    if not current_user:
+        return jsonify({
+            "error": "User not registered"
+        }), 403
+
+    user_id = str(current_user["id"])
+    target_id = str(target_id)
+
+    if user_id == target_id:
+        return jsonify({
+            "error": "Cannot DM yourself"
+        }), 400
+
+    target_exists = any(
+        str(user["id"]) == target_id
+        for user in users
+    )
+
+    if not target_exists:
+        return jsonify({
+            "error": "Target user does not exist"
+        }), 404
+
+    chat_file = get_dm_file(
+        user_id,
+        target_id
+    )
+
+    if request.method == "POST":
+
+        data = request.get_json()
+
+        if not data:
+            return jsonify({
+                "error": "Invalid JSON"
+            }), 400
+
+        message = data.get(
+            "message",
+            ""
+        ).strip()
+
+        if not message:
+            return jsonify({
+                "error": "Empty message"
+            }), 400
+
+        now = datetime.now().strftime(
+            "%H:%M:%S"
+        )
+
+        line = (
+            f"[{now}] "
+            f"({user_id}) "
+            f"{message}\n"
+        )
+
+        with open(
+            chat_file,
+            "a",
+            encoding="utf-8"
+        ) as file:
+            file.write(line)
+
+        return jsonify({
+            "status": "sent"
+        })
+
+    if not os.path.exists(chat_file):
+        return jsonify([])
+
+    with open(
+        chat_file,
+        "r",
+        encoding="utf-8"
+    ) as file:
+        messages = file.readlines()
+
+    return jsonify(messages)
 
 @app.route("/<path:filename>")
 def static_files(filename):
