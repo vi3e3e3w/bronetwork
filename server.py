@@ -1321,6 +1321,19 @@ def home():
         "index.html"
     )
 
+'''===========================
+DM CHAT
+=============================
+'''
+@app.route("/lchat.html/ID=@<target_id>")
+def lchat_dm(target_id):
+    register_user()
+
+    return send_from_directory(
+        ".",
+        "lchat.html"
+    )
+
 
 @app.route("/<path:filename>")
 def static_files(filename):
