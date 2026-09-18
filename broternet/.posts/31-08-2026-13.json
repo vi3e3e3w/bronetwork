@@ -1,7 +1,0 @@
-{
-    "title": "How to Sign Up Broternet",
-    "content": "Before use Broternet, you need Bro Network\n1) Go to 192.168.1.10:8080\n2) Press the \"Sign Up\"\n3) You will give a ID user\nThis ID will use in Broternet to backend know you\n4) Enjoy\n\nFact: Your ID user is the last digit of your IP\nEx: Your IP is 192.168.1.56\nBackend will take 56 at ID\nyou need to connect the \"adb local network\"",
-    "attachment": null,
-    "date": "31-08-2026",
-    "id": "13"
-}

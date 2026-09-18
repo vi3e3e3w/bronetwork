@@ -1,3 +1,4 @@
+import uuid
 import subprocess
 from datetime import datetime
 import json
@@ -8,6 +9,42 @@ import re
 from flask import Flask, request, jsonify, send_from_directory
 
 app = Flask(__name__)
+
+
+
+# ========================================================
+# CUSTOM 404
+# ========================================================
+
+@app.errorhandler(404)
+def page_not_found(error):
+
+    return """
+    <!DOCTYPE html>
+    <html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <title>404 | Bro network</title>
+    </head>
+
+    <body>
+
+        <h1>404 | Bro network</h1>
+
+        <p>Bro found a new page! But it's not available yet!</p>
+        <button onclick="window.location.href='/'">
+    ← go home lol
+</button>
+
+    </body>
+
+    </html>
+    """, 404
+
+@app.route("/coffee")
+def coffee():
+    return "Bro....I only have tea!🫖", 418
 
 active_users = {}
 notifications = {}
@@ -32,6 +69,7 @@ def load_users():
         with open(USERS_FILE, "r", encoding="utf-8") as file:
             return json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
+        print ("ERR: Can't load JSON, crated new JSON")
         return []
 
 
@@ -370,6 +408,29 @@ def pushup_inbox():
 
 BROTERNET_POSTS_DIR = "broternet/.posts"
 
+BROTERNET_INTERACTIONS_DIR = \
+    "broternet/.interactions"
+
+BROTERNET_LIKES_DIR = os.path.join(
+    BROTERNET_INTERACTIONS_DIR,
+    "likes"
+)
+
+BROTERNET_COMMENTS_DIR = os.path.join(
+    BROTERNET_INTERACTIONS_DIR,
+    "comments"
+)
+
+os.makedirs(
+    BROTERNET_LIKES_DIR,
+    exist_ok=True
+)
+
+os.makedirs(
+    BROTERNET_COMMENTS_DIR,
+    exist_ok=True
+)
+
 os.makedirs(
     BROTERNET_POSTS_DIR,
     exist_ok=True
@@ -418,48 +479,83 @@ def broternet_posts():
         user_id = client_ip.split(".")[-1]
 
         for user in users:
+
             if user["ip"] == client_ip:
+
                 user_id = user["id"]
+
                 break
+
 
         date = datetime.now().strftime(
             "%d-%m-%Y"
         )
 
+
+        # Unique ID for this post
+
+        post_id = uuid.uuid4().hex
+
+
         post = {
+
+            "id": post_id,
+
+            "user_id": str(user_id),
+
             "title": title,
+
             "content": content,
+
             "attachment": None,
-            "date": date,
-            "id": user_id
+
+            "date": date
+
         }
 
+
         filename = (
-            f"{date}-{user_id}.json"
+            f"{date}-{user_id}-{post_id}.json"
         )
+
 
         filepath = os.path.join(
+
             BROTERNET_POSTS_DIR,
+
             filename
+
         )
 
+
         with open(
+
             filepath,
+
             "w",
+
             encoding="utf-8"
+
         ) as file:
 
             json.dump(
+
                 post,
+
                 file,
+
                 indent=4,
+
                 ensure_ascii=False
+
             )
+
 
         return jsonify({
             "message": "Post published!",
             "post": post
         })
+
 
 
     # ========================================================
@@ -502,6 +598,449 @@ def broternet_posts():
             )
 
     return jsonify(posts)
+
+# ========================================================
+# BROTERNET: DELETE POST API
+# ========================================================
+
+@app.route(
+    "/api/broternet/posts/<post_id>",
+    methods=["DELETE"]
+)
+def broternet_delete_post(post_id):
+
+    register_user()
+
+    # FIND CURRENT USER
+    client_ip = request.remote_addr
+    users = load_users()
+
+    current_user_id = \
+        client_ip.split(".")[-1]
+
+    for user in users:
+        if user["ip"] == client_ip:
+            current_user_id = user["id"]
+            break
+
+    current_user_id = str(
+        current_user_id
+    )
+
+    post_filepath = None
+    post = None
+
+    # FIND POST
+    for filename in os.listdir(
+        BROTERNET_POSTS_DIR
+    ):
+        if not filename.endswith(".json"):
+            continue
+
+        filepath = os.path.join(
+            BROTERNET_POSTS_DIR,
+            filename
+        )
+
+        try:
+            with open(
+                filepath,
+                "r",
+                encoding="utf-8"
+            ) as file:
+                loaded_post = json.load(file)
+
+            if str(
+                loaded_post.get("id", "")
+            ) == str(post_id):
+
+                post_filepath = filepath
+                post = loaded_post
+                break
+
+        except (
+            json.JSONDecodeError,
+            OSError
+        ):
+            continue
+
+    # POST NOT FOUND
+    if post_filepath is None:
+        return jsonify({
+            "error": "Post not found"
+        }), 404
+
+    # CHECK POST OWNER
+    post_owner_id = str(
+        post.get("user_id", "")
+    )
+
+    if post_owner_id != current_user_id:
+        return jsonify({
+            "error":
+            "Bro really trying to delete someone else's post?"
+        }), 403
+
+    # DELETE POST
+    try:
+        os.remove(post_filepath)
+    except OSError:
+        return jsonify({
+            "error": "Unable to delete post"
+        }), 500
+
+    # DELETE LIKES
+    like_filepath = os.path.join(
+        BROTERNET_LIKES_DIR,
+        f"{post_id}.json"
+    )
+
+    if os.path.exists(like_filepath):
+        try:
+            os.remove(like_filepath)
+        except OSError:
+            pass
+
+    # DELETE COMMENTS
+    comment_filepath = os.path.join(
+        BROTERNET_COMMENTS_DIR,
+        f"{post_id}.json"
+    )
+
+    if os.path.exists(comment_filepath):
+        try:
+            os.remove(comment_filepath)
+        except OSError:
+            pass
+
+    return jsonify({
+        "message": "Post deleted!"
+    })
+# ========================================================
+# BROTERNET: LIKE API
+# ========================================================
+
+@app.route(
+    "/api/broternet/posts/<post_id>/like",
+    methods=["GET","POST"]
+)
+def broternet_like_post(post_id):
+
+    register_user()
+
+    # ----------------------------------------------------
+    # FIND CURRENT USER
+    # ----------------------------------------------------
+
+    client_ip = request.remote_addr
+
+    users = load_users()
+
+    current_user_id = \
+        client_ip.split(".")[-1]
+
+    for user in users:
+
+        if user["ip"] == client_ip:
+
+            current_user_id = user["id"]
+
+            break
+
+    current_user_id = str(
+        current_user_id
+    )
+
+
+    # ----------------------------------------------------
+    # CHECK POST EXISTS
+    # ----------------------------------------------------
+
+    post_exists = False
+
+    for filename in os.listdir(
+        BROTERNET_POSTS_DIR
+    ):
+
+        if not filename.endswith(".json"):
+            continue
+
+        filepath = os.path.join(
+            BROTERNET_POSTS_DIR,
+            filename
+        )
+
+        try:
+
+            with open(
+                filepath,
+                "r",
+                encoding="utf-8"
+            ) as file:
+
+                post = json.load(file)
+
+            if str(
+                post.get("id", "")
+            ) == str(post_id):
+
+                post_exists = True
+
+                break
+
+        except (
+            json.JSONDecodeError,
+            OSError
+        ):
+
+            continue
+
+
+    if not post_exists:
+
+        return jsonify({
+            "error": "Post not found"
+        }), 404
+
+
+    # ----------------------------------------------------
+    # LOAD LIKES
+    # ----------------------------------------------------
+
+    like_filepath = os.path.join(
+        BROTERNET_LIKES_DIR,
+        f"{post_id}.json"
+    )
+
+    likes = []
+
+
+    if os.path.exists(like_filepath):
+
+        try:
+
+            with open(
+                like_filepath,
+                "r",
+                encoding="utf-8"
+            ) as file:
+
+                likes = json.load(file)
+
+        except (
+            json.JSONDecodeError,
+            OSError
+        ):
+
+            likes = []
+
+
+    likes = [
+        str(user_id)
+        for user_id in likes
+    ]
+
+    # GET LIKE STATUS
+    if request.method == "GET":
+        return jsonify({
+            "liked": current_user_id in likes,
+            "count": len(likes)
+        })
+
+
+    # ----------------------------------------------------
+    # TOGGLE LIKE
+    # ----------------------------------------------------
+
+    if current_user_id in likes:
+
+        likes.remove(
+            current_user_id
+        )
+
+        liked = False
+
+    else:
+
+        likes.append(
+            current_user_id
+        )
+
+        liked = True
+
+
+    # ----------------------------------------------------
+    # SAVE LIKES
+    # ----------------------------------------------------
+
+    with open(
+        like_filepath,
+        "w",
+        encoding="utf-8"
+    ) as file:
+
+        json.dump(
+            likes,
+            file,
+            indent=4,
+            ensure_ascii=False
+        )
+
+
+    return jsonify({
+
+        "liked":
+            liked,
+
+        "count":
+            len(likes)
+
+    })
+
+# ========================================================
+# BROTERNET: COMMENT API
+# ========================================================
+
+@app.route(
+    "/api/broternet/posts/<post_id>/comments",
+    methods=["GET", "POST"]
+)
+def broternet_comments(post_id):
+
+    register_user()
+
+    # FIND CURRENT USER
+    client_ip = request.remote_addr
+    users = load_users()
+
+    current_user_id = \
+        client_ip.split(".")[-1]
+
+    for user in users:
+        if user["ip"] == client_ip:
+            current_user_id = user["id"]
+            break
+
+    current_user_id = str(
+        current_user_id
+    )
+
+    # CHECK POST EXISTS
+    post_exists = False
+
+    for filename in os.listdir(
+        BROTERNET_POSTS_DIR
+    ):
+        if not filename.endswith(".json"):
+            continue
+
+        filepath = os.path.join(
+            BROTERNET_POSTS_DIR,
+            filename
+        )
+
+        try:
+            with open(
+                filepath,
+                "r",
+                encoding="utf-8"
+            ) as file:
+                post = json.load(file)
+
+            if str(
+                post.get("id", "")
+            ) == str(post_id):
+                post_exists = True
+                break
+
+        except (
+            json.JSONDecodeError,
+            OSError
+        ):
+            continue
+
+    if not post_exists:
+        return jsonify({
+            "error": "Post not found"
+        }), 404
+
+    # COMMENT FILE
+    comment_filepath = os.path.join(
+        BROTERNET_COMMENTS_DIR,
+        f"{post_id}.json"
+    )
+
+    comments = []
+
+    if os.path.exists(
+        comment_filepath
+    ):
+        try:
+            with open(
+                comment_filepath,
+                "r",
+                encoding="utf-8"
+            ) as file:
+                comments = json.load(file)
+
+        except (
+            json.JSONDecodeError,
+            OSError
+        ):
+            comments = []
+
+    # GET COMMENTS
+    if request.method == "GET":
+        return jsonify({
+            "comments": comments,
+            "count": len(comments)
+        })
+
+    # CREATE COMMENT
+    data = request.get_json()
+
+    if not data:
+        return jsonify({
+            "error": "Invalid JSON"
+        }), 400
+
+    content = data.get(
+        "content",
+        ""
+    ).strip()
+
+    if not content:
+        return jsonify({
+            "error": "Comment cannot be empty"
+        }), 400
+
+    comment = {
+        "id": uuid.uuid4().hex,
+        "user_id": current_user_id,
+        "content": content,
+        "date": datetime.now().strftime(
+            "%d-%m-%Y"
+        )
+    }
+
+    comments.append(comment)
+
+    with open(
+        comment_filepath,
+        "w",
+        encoding="utf-8"
+    ) as file:
+        json.dump(
+            comments,
+            file,
+            indent=4,
+            ensure_ascii=False
+        )
+
+    return jsonify({
+        "comment": comment,
+        "count": len(comments)
+    })
 
 # ============================================================
 # BROTERNET: MEDIA UPLOAD
@@ -1311,6 +1850,122 @@ def network_devices():
 
 
     return jsonify(devices)
+
+# =========================
+# BROTERMINAL
+# =========================
+
+@app.route(
+    "/api/terminal",
+    methods=["POST"]
+)
+def terminal():
+
+    register_user()
+
+    client_ip = request.remote_addr
+
+    users = load_users()
+
+    current_user = next(
+        (
+            user
+            for user in users
+            if user["ip"] == client_ip
+        ),
+        None
+    )
+
+    if not current_user:
+        return jsonify({
+            "error": "User not registered"
+        }), 403
+
+    user_id = current_user["id"]
+    data = request.get_json()
+
+    if not data:
+        return jsonify({
+            "err": "Invalid JSON"
+        }), 400
+
+    command = data.get(
+        "command",
+        ""
+    ).strip()
+
+    if not command:
+        return jsonify({
+            "err": "Empty command"
+        }), 400
+
+
+    if command == "whoami":
+
+        return jsonify({
+            "output": str(user_id)
+        })
+
+
+    if command == "active":
+        return jsonify({
+            "output":
+                "User active:\n" +
+                "\n".join(
+                    str(user_id)
+                    for user_id in active_users
+                )
+        })
+
+    if command == "pwd":
+
+        return jsonify({
+            "output": f"/home/{user_id}"
+        })
+
+
+    if command == "ls":
+
+        return jsonify({
+            "output": "brotools  home  shared"
+        })
+
+
+    if command == "help":
+
+        return jsonify({
+            "output":
+                "whoami\n"
+                "active\n"
+                "pwd\n"
+                "ls\n"
+                "echo\n"
+                "which\n"
+                "help\n"
+                "clear"
+        })
+
+
+    if command == "clear":
+
+        return jsonify({
+            "output": "",
+            "clear": True
+        })
+
+
+    if command.startswith("echo "):
+
+        return jsonify({
+            "output": command[5:]
+        })
+
+
+    return jsonify({
+        "output":
+            command +
+            ": bro...command not exist!"
+    })
 
 @app.route("/")
 def home():

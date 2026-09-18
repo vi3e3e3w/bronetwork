@@ -63,7 +63,7 @@ async function loadPosts() {
         }
 
 
-        posts.forEach(post => {
+        posts.forEach(async post => {
 
             const postElement =
                 document.createElement("article");
@@ -86,24 +86,483 @@ async function loadPosts() {
                 post.content;
 
 
-            const info =
-                document.createElement("small");
+const info =
+    document.createElement("small");
 
-            info.textContent =
-                "ID " +
-                post.id +
-                " • " +
-                post.date;
+info.textContent =
+    "User " +
+    (post.user_id || post.id) +
+    " • " +
+    post.date;
+
+postElement.appendChild(title);
+postElement.appendChild(content);
+postElement.appendChild(info);
 
 
-            postElement.appendChild(title);
-            postElement.appendChild(content);
-            postElement.appendChild(info);
+// ========================================================
+// POST ACTIONS
+// ========================================================
 
-            postsContainer.appendChild(
-                postElement
+const actions =
+    document.createElement("div");
+
+actions.className =
+    "post-actions";
+
+
+const likeButton =
+    document.createElement("button");
+
+likeButton.className =
+    "post-action like-button";
+
+likeButton.type =
+    "button";
+
+likeButton.textContent =
+    "❤️ 0";
+
+try {
+
+    const likeResponse =
+        await fetch(
+            "/api/broternet/posts/" +
+            post.id +
+            "/like"
+        );
+
+    const likeData =
+        await likeResponse.json();
+
+    if (likeResponse.ok) {
+
+        likeButton.textContent =
+            "❤️ " +
+            likeData.count;
+
+    }
+
+} catch (error) {
+
+    console.error(
+        "Unable to load likes:",
+        error
+    );
+
+}
+
+
+likeButton.addEventListener(
+    "click",
+    async () => {
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/broternet/posts/" +
+                    post.id +
+                    "/like",
+                    {
+                        method: "POST"
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (!response.ok) {
+                console.error(
+                    "Like failed:",
+                    data
+                );
+                return;
+            }
+
+            likeButton.textContent =
+                "❤️ " + data.count;
+
+        } catch (error) {
+
+            console.error(
+                "Unable to like post:",
+                error
             );
 
+        }
+
+    }
+);
+const deleteButton =
+    document.createElement("button");
+
+deleteButton.className =
+    "post-action delete-button";
+
+deleteButton.type =
+    "button";
+
+deleteButton.textContent =
+    "🗑️ Del Post";
+deleteButton.addEventListener(
+    "click",
+    async () => {
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/broternet/posts/" +
+                    post.id,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+            const data =
+                await response.json();
+
+if (!response.ok) {
+
+    if (response.status === 403) {
+
+        broDialog(
+            data.error
+        );
+
+    } else {
+
+        broDialog(
+            "Unable to delete post."
+        );
+
+    }
+
+    return;
+}
+            postElement.remove();
+
+        } catch (error) {
+
+            console.error(
+                "Unable to delete post:",
+                error
+            );
+
+        }
+
+    }
+);
+actions.appendChild(
+    deleteButton
+);
+
+// ========================================================
+// COMMENT BUTTON
+// ========================================================
+
+const commentButton =
+    document.createElement("button");
+
+commentButton.className =
+    "post-action comment-button";
+
+commentButton.type =
+    "button";
+
+commentButton.textContent =
+    "💬 0";
+
+
+// ========================================================
+// COMMENT PANEL
+// ========================================================
+
+const commentPanel =
+    document.createElement("div");
+
+commentPanel.className =
+    "comment-panel";
+
+commentPanel.style.display =
+    "none";
+
+
+// COMMENTS LIST
+
+const commentsList =
+    document.createElement("div");
+
+commentsList.className =
+    "comments-list";
+
+commentPanel.appendChild(
+    commentsList
+);
+
+
+// COMMENT INPUT
+
+const commentInputBox =
+    document.createElement("div");
+
+commentInputBox.className =
+    "comment-input-box";
+
+
+const commentInput =
+    document.createElement("input");
+
+commentInput.type =
+    "text";
+
+commentInput.placeholder =
+    "Write a comment...";
+
+
+const commentSendButton =
+    document.createElement("button");
+
+commentSendButton.type =
+    "button";
+
+commentSendButton.textContent =
+    "Send";
+
+
+commentInputBox.appendChild(
+    commentInput
+);
+
+commentInputBox.appendChild(
+    commentSendButton
+);
+
+commentPanel.appendChild(
+    commentInputBox
+);
+
+postElement.appendChild(
+    commentPanel
+);
+
+
+// ========================================================
+// LOAD COMMENTS
+// ========================================================
+
+async function loadComments() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/broternet/posts/" +
+                post.id +
+                "/comments"
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok) {
+
+            console.error(
+                "Comments failed:",
+                data
+            );
+
+            return;
+
+        }
+
+        commentButton.textContent =
+            "💬 " + data.count;
+
+        commentsList.innerHTML =
+            "";
+
+        data.comments.forEach(
+            comment => {
+
+                const commentElement =
+                    document.createElement(
+                        "div"
+                    );
+
+                commentElement.className =
+                    "comment";
+
+
+                const commentInfo =
+                    document.createElement(
+                        "small"
+                    );
+
+                commentInfo.textContent =
+                    "User " +
+                    comment.user_id +
+                    " • " +
+                    comment.date;
+
+
+                const commentContent =
+                    document.createElement(
+                        "p"
+                    );
+
+                commentContent.textContent =
+                    comment.content;
+
+
+                commentElement.appendChild(
+                    commentInfo
+                );
+
+                commentElement.appendChild(
+                    commentContent
+                );
+
+                commentsList.appendChild(
+                    commentElement
+                );
+
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Unable to load comments:",
+            error
+        );
+
+    }
+
+}
+
+await loadComments();
+
+// ========================================================
+// OPEN / CLOSE COMMENTS
+// ========================================================
+
+commentButton.addEventListener(
+    "click",
+    async () => {
+
+        if (
+            commentPanel.style.display ===
+            "none"
+        ) {
+
+            commentPanel.style.display =
+                "block";
+
+            await loadComments();
+
+        } else {
+
+            commentPanel.style.display =
+                "none";
+
+        }
+
+    }
+);
+
+
+// ========================================================
+// SEND COMMENT
+// ========================================================
+
+commentSendButton.addEventListener(
+    "click",
+    async () => {
+
+        const content =
+            commentInput.value.trim();
+
+        if (!content) {
+            return;
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/broternet/posts/" +
+                    post.id +
+                    "/comments",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            content: content
+                        })
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (!response.ok) {
+
+                console.error(
+                    "Comment failed:",
+                    data
+                );
+
+                return;
+
+            }
+
+
+            commentInput.value =
+                "";
+
+
+            commentButton.textContent =
+                "💬 " + data.count;
+
+
+            await loadComments();
+
+        } catch (error) {
+
+            console.error(
+                "Unable to send comment:",
+                error
+            );
+
+        }
+
+    }
+);
+actions.appendChild(
+    likeButton
+);
+
+actions.appendChild(
+    commentButton
+);
+
+
+postElement.appendChild(
+    actions
+);
+
+
+postsContainer.appendChild(
+    postElement
+);
         });
 
     } catch (error) {
@@ -1465,3 +1924,4 @@ loadMusic();
 updateVideoForm();
 
 loadImages();
+

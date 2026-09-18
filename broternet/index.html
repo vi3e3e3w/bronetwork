@@ -23,11 +23,12 @@
     rel="stylesheet"
     href="broternet.css"
 >
+<link rel="stylesheet" href="../style.css">
 
 </head>
 
 <body>
-
+<main class="broternet-page">
 <!-- ================================================= -->
 
 <!-- NAVIGATION -->
@@ -553,7 +554,7 @@
 
 
 
-<footer>
+<footer class="broternet-footer">
 
 <span>
     BROTERNET
@@ -571,9 +572,42 @@
 
 
 
-
+<script src="../script.js"></script>
 <script src="broternet.js"></script>
 
+<div id="bro-dialog" class="bro-dialog">
+
+    <div class="bro-dialog-box">
+
+        <div
+            id="bro-dialog-content"
+            class="bro-dialog-content"
+        >
+            Content
+        </div>
+
+        <div class="bro-dialog-actions">
+
+            <button
+                id="bro-dialog-opt1"
+            >
+                OK
+            </button>
+
+            <button
+                id="bro-dialog-opt2"
+                class="secondary"
+            >
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 </body>
+
+</main>
 
 </html>
