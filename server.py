@@ -59,6 +59,27 @@ os.makedirs(CHAT_HISTORY_DIR, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
+# ==============================
+# BROSTORAGE
+# ==============================
+
+BASE_DIR = os.path.dirname(
+    os.path.abspath(__file__)
+)
+
+BROSTORAGE_DIR = os.path.join(
+    BASE_DIR,
+    ".brostorage",
+    "share",
+    "allfile"
+)
+
+os.makedirs(
+    BROSTORAGE_DIR,
+    exist_ok=True
+)
+
+
 def register_user():
     ip = request.remote_addr
     active_users[ip] = time.time()
@@ -401,6 +422,160 @@ def pushup_inbox():
 
     return jsonify(files)
 
+
+# ========================================================
+# BROSTORAGE: LIST FILES
+# ========================================================
+
+@app.route(
+    "/api/brostorage/files",
+    methods=["GET"]
+)
+def brostorage_files():
+
+    register_user()
+
+    files = []
+
+    for filename in os.listdir(
+        BROSTORAGE_DIR
+    ):
+
+        filepath = os.path.join(
+            BROSTORAGE_DIR,
+            filename
+        )
+
+        if not os.path.isfile(filepath):
+            continue
+
+        files.append({
+            "name": filename,
+            "size": os.path.getsize(filepath)
+        })
+
+    return jsonify({
+        "files": files
+    })
+
+# ========================================================
+# BROSTORAGE: UPLOAD
+# ========================================================
+
+@app.route(
+    "/api/brostorage/upload",
+    methods=["POST"]
+)
+def brostorage_upload():
+
+    register_user()
+
+    if "file" not in request.files:
+
+        return jsonify({
+            "error": "No file uploaded"
+        }), 400
+
+    file = request.files["file"]
+
+    if file.filename == "":
+
+        return jsonify({
+            "error": "No selected file"
+        }), 400
+
+    filename = os.path.basename(
+        file.filename
+    )
+
+    filepath = os.path.join(
+        BROSTORAGE_DIR,
+        filename
+    )
+
+    file.save(filepath)
+
+    return jsonify({
+        "message": "File uploaded!",
+        "filename": filename
+    })
+
+
+
+# ========================================================
+# BROSTORAGE: DOWNLOAD
+# ========================================================
+
+@app.route(
+    "/api/brostorage/download/<path:filename>",
+    methods=["GET"]
+)
+def brostorage_download(filename):
+
+    register_user()
+
+    filename = os.path.basename(
+        filename
+    )
+
+    filepath = os.path.join(
+        BROSTORAGE_DIR,
+        filename
+    )
+
+    if not os.path.isfile(filepath):
+
+        return jsonify({
+            "error": "File not found"
+        }), 404
+
+    return send_from_directory(
+        BROSTORAGE_DIR,
+        filename,
+        as_attachment=True
+    )
+
+# ========================================================
+# BROSTORAGE: DELETE
+# ========================================================
+
+@app.route(
+    "/api/brostorage/delete/<path:filename>",
+    methods=["DELETE"]
+)
+def brostorage_delete(filename):
+
+    register_user()
+
+    filename = os.path.basename(
+        filename
+    )
+
+    filepath = os.path.join(
+        BROSTORAGE_DIR,
+        filename
+    )
+
+    if not os.path.isfile(filepath):
+
+        return jsonify({
+            "error": "File not found"
+        }), 404
+
+    try:
+
+        os.remove(filepath)
+
+    except OSError:
+
+        return jsonify({
+            "error": "Unable to delete file"
+        }), 500
+
+    return jsonify({
+        "message": "File deleted!",
+        "filename": filename
+    })
 
 # ============================================================
 # BROTERNET: POSTS API

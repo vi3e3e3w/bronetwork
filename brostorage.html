@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>BroStorage | Bro Network</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="brostorage.css"
+    >
+
+</head>
+
+
+<body>
+
+<div class="app">
+
+
+    <!-- HEADER -->
+
+    <header>
+
+        <div class="brand">
+
+            <div class="logo-dot"></div>
+
+            <img
+                src="logo.svg"
+                alt="Bro Network"
+                class="brand-logo"
+            >
+
+        </div>
+
+
+        <nav>
+
+            <a href="index.html">
+                Home
+            </a>
+
+            <a href="lchat.html">
+                Local Chat
+            </a>
+
+            <a href="brodiscover.html">
+                Discover
+            </a>
+
+            <a
+                href="brostorage.html"
+                class="active"
+            >
+                BroStorage
+            </a>
+
+        </nav>
+
+
+        <button
+            class="user-id"
+            onclick="login()"
+        >
+            ID
+        </button>
+
+    </header>
+
+
+    <!-- MAIN -->
+
+    <main class="brostorage-main">
+
+
+        <section class="brostorage-title">
+
+            <p class="eyebrow">
+                LOCAL SHARED STORAGE
+            </p>
+
+            <h1>
+                BroStorage
+            </h1>
+
+            <p>
+                Shared files available
+                across your local network.
+            </p>
+
+        </section>
+
+
+        <!-- STORAGE INFO -->
+
+        <section class="storage-info">
+
+            <div class="storage-card">
+
+                <span class="storage-label">
+                    STORAGE
+                </span>
+
+                <strong>
+                    BroStorage
+                </strong>
+
+            </div>
+
+
+            <div class="storage-card">
+
+                <span class="storage-label">
+                    PATH
+                </span>
+
+                <strong>
+                    /share/allfile
+                </strong>
+
+            </div>
+
+
+            <div class="storage-card">
+
+                <span class="storage-label">
+                    FILES
+                </span>
+
+                <strong id="file-count">
+                    0
+                </strong>
+
+            </div>
+
+        </section>
+
+
+        <!-- FILES -->
+
+        <section class="storage-section">
+
+            <div class="storage-section-header">
+
+                <div>
+
+                    <p class="eyebrow">
+                        SHARED FILES
+                    </p>
+
+                    <h2>
+                        All Files
+                    </h2>
+
+                </div>
+
+
+                <button
+                    id="upload-button"
+                    class="storage-upload-button"
+                >
+                    Upload
+                </button>
+
+            </div>
+
+
+            <!-- Hidden file input -->
+
+            <input
+                type="file"
+                id="file-input"
+                hidden
+            >
+
+
+            <!-- File list -->
+
+            <div
+                id="file-list"
+                class="file-list"
+            >
+
+                Loading...
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <span>
+            BRO NETWORK
+        </span>
+
+        <span>
+            BROSTORAGE
+        </span>
+
+    </footer>
+
+
+</div>
+
+
+<!-- BRO DIALOG -->
+
+<!--
+    BroDialog is already provided by script.js.
+    BroStorage only calls broDialog().
+-->
+
+
+<script src="script.js"></script>
+
+<script src="brostorage.js"></script>
+
+</body>
+
+</html>
