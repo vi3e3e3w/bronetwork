@@ -2,7 +2,7 @@
 /* BRO STORAGE                    */
 /* ============================= */
 
-.storage-main {
+.brostorage-main {
     max-width: 1100px;
     margin: 0 auto;
     padding: 70px 30px 40px;
@@ -11,17 +11,17 @@
 
 /* TITLE */
 
-.storage-title {
+.brostorage-title {
     margin-bottom: 45px;
 }
 
-.storage-title h1 {
+.brostorage-title h1 {
     margin: 8px 0 12px;
     font-size: 48px;
     letter-spacing: -1px;
 }
 
-.storage-title p:last-child {
+.brostorage-title p:last-child {
     color: #888;
     font-size: 17px;
 }
@@ -84,7 +84,7 @@
 
 /* FILE STORAGE */
 
-.storage {
+.storage-section {
     border: 1px solid #242424;
 
     border-radius: 16px;
@@ -95,7 +95,7 @@
 }
 
 
-.storage-header {
+.storage-section-header {
     display: flex;
 
     align-items: center;
@@ -108,14 +108,14 @@
 }
 
 
-.storage-header h2 {
+.storage-section-header h2 {
     margin: 0 0 5px;
 
     font-size: 21px;
 }
 
 
-.storage-header p {
+.storage-section-header p {
     margin: 0;
 
     color: #777;
@@ -126,7 +126,7 @@
 
 /* UPLOAD */
 
-.upload-button {
+.storage-upload-button {
     border: 0;
 
     border-radius: 9px;
@@ -147,7 +147,7 @@
 }
 
 
-.upload-button:hover {
+.storage-upload-button:hover {
     transform: translateY(-1px);
 
     opacity: 0.85;
@@ -160,6 +160,90 @@
     min-height: 300px;
 
     padding: 25px;
+}
+
+
+.storage-file {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 18px;
+
+    padding: 16px 0;
+
+    border-bottom: 1px solid #242424;
+}
+
+
+.storage-file:last-child {
+    border-bottom: 0;
+}
+
+
+.file-info {
+    min-width: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+
+.file-name {
+    overflow-wrap: anywhere;
+
+    font-weight: 600;
+}
+
+
+.file-size {
+    color: #777;
+
+    font-size: 13px;
+}
+
+
+.file-actions {
+    display: flex;
+
+    gap: 10px;
+}
+
+
+.download-file,
+.delete-file {
+    border: 1px solid #2b2b2b;
+
+    border-radius: 8px;
+
+    padding: 8px 12px;
+
+    background: #161616;
+
+    color: white;
+
+    cursor: pointer;
+}
+
+
+.download-file:hover,
+.delete-file:hover {
+    background: #222;
+}
+
+
+.delete-file {
+    color: #ff7777;
+}
+
+
+.storage-error {
+    color: #ff7777;
 }
 
 
@@ -211,7 +295,7 @@
         grid-template-columns: 1fr;
     }
 
-    .storage-title h1 {
+    .brostorage-title h1 {
         font-size: 38px;
     }
 
@@ -220,15 +304,21 @@
 
 @media (max-width: 600px) {
 
-    .storage-main {
+    .brostorage-main {
         padding:
             45px 18px 30px;
     }
 
-    .storage-header {
+    .storage-section-header {
         align-items: flex-start;
 
         gap: 15px;
+
+        flex-direction: column;
+    }
+
+    .storage-file {
+        align-items: flex-start;
 
         flex-direction: column;
     }

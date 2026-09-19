@@ -204,8 +204,7 @@ async function uploadBroFile(file) {
         );
 
         broDialog(
-            "Upload failed",
-            error.message
+            `Oppsy daisy, error has occurred: ${error.message}. If this error is from me, report it on GitHub.`
         );
     }
 }
@@ -264,8 +263,7 @@ async function deleteBroFile(filename) {
         );
 
         broDialog(
-            "Delete failed",
-            error.message
+            `Oppsy daisy, error has occurred: ${error.message}. If this error is from me, report it on GitHub.`
         );
     }
 }
