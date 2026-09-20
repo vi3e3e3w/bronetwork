@@ -770,24 +770,44 @@ async function loadVideos() {
 
 
             if (video.type === "embed") {
+  if (video.local_source) {
 
-                const frame =
-                    document.createElement("iframe");
+        const player =
+            document.createElement("video");
 
-                frame.src =
-                    video.source;
+        player.src =
+            video.local_source;
 
-                frame.width = "560";
+        player.controls =
+            true;
 
-                frame.height = "315";
+        player.style.maxWidth =
+            "100%";
 
-                frame.allowFullscreen =
-                    true;
+        article.appendChild(player);
 
-                frame.style.maxWidth =
-                    "100%";
+    } else {
 
-                article.appendChild(frame);
+        const frame =
+            document.createElement("iframe");
+
+        frame.src =
+            video.source;
+
+        frame.width =
+            "560";
+
+        frame.height =
+            "315";
+
+        frame.allowFullscreen =
+            true;
+
+        frame.style.maxWidth =
+            "100%";
+
+        article.appendChild(frame);
+    }
 
             } else {
 
