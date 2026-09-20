@@ -1,3 +1,8 @@
+# WARNING:
+# If it works, don't touch it.
+# If you touch it, it may stop working.
+# If it stops working, nobody knows why.
+# This code has succeeded as expected.
 import uuid
 import subprocess
 from datetime import datetime
@@ -5,6 +10,7 @@ import json
 import time
 import os
 import re
+from urllib.parse import urlparse
 
 from flask import Flask, request, jsonify, send_from_directory
 
@@ -1384,6 +1390,21 @@ os.makedirs(
     exist_ok=True
 )
 
+def is_youtube_url(url):
+    try:
+        parsed = urlparse(url)
+        hostname = (parsed.hostname or "").lower()
+
+        return hostname in {
+            "youtube.com",
+            "www.youtube.com",
+            "m.youtube.com",
+            "youtu.be"
+        }
+
+    except Exception:
+        return False
+
 
 @app.route(
     "/api/broternet/videos",
@@ -1401,6 +1422,7 @@ def broternet_videos():
                 "error": "Invalid JSON"
             }), 400
 
+
         title = data.get(
             "title",
             ""
@@ -1416,11 +1438,13 @@ def broternet_videos():
             ""
         ).strip()
 
+
         if not title or not source:
             return jsonify({
                 "error":
                     "Title and video source are required"
             }), 400
+
 
         if video_type not in [
             "mp4",
@@ -1431,15 +1455,18 @@ def broternet_videos():
                     "Video type must be local or embed"
             }), 400
 
+
         client_ip = request.remote_addr
         users = load_users()
 
         user_id = client_ip.split(".")[-1]
 
         for user in users:
+
             if user["ip"] == client_ip:
                 user_id = user["id"]
                 break
+
 
         date = datetime.now().strftime(
             "%d-%m-%Y"
@@ -1449,6 +1476,112 @@ def broternet_videos():
             "%H%M%S"
         )
 
+
+        local_source = None
+
+
+        # ====================================================
+        # YOUTUBE DOWNLOAD
+        # ====================================================
+
+        if video_type == "embed":
+
+            if not is_youtube_url(source):
+                return jsonify({
+                    "error":
+                        "Only YouTube videos are supported"
+                }), 400
+
+
+            download_name = (
+                f"{date}-{user_id}-{timestamp}"
+            )
+
+            output_template = os.path.join(
+                BROTERNET_VIDEO_UPLOAD_DIR,
+                download_name + ".%(ext)s"
+            )
+
+
+            command = [
+                "yt-dlp",
+
+                "--no-playlist",
+
+                "--format",
+                "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+                "--recode-video",
+                "mp4",
+
+                "--output",
+                output_template,
+
+                source
+            ]
+
+
+            try:
+
+                result = subprocess.run(
+                    command,
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+
+            except FileNotFoundError:
+
+                return jsonify({
+                    "error":
+                        "yt-dlp is not installed on the server"
+                }), 500
+
+
+            except subprocess.CalledProcessError as error:
+
+                print(
+                    "yt-dlp failed:",
+                    error.stderr
+                )
+
+                return jsonify({
+                    "error":
+                        "Unable to download YouTube video"
+                }), 502
+
+
+            local_filename = (
+                download_name
+                + ".mp4"
+            )
+
+
+            local_filepath = os.path.join(
+                BROTERNET_VIDEO_UPLOAD_DIR,
+                local_filename
+            )
+
+
+            if not os.path.isfile(
+                local_filepath
+            ):
+
+                return jsonify({
+                    "error":
+                        "Video download completed but MP4 was not found"
+                }), 500
+
+
+            local_source = (
+                "/uploads/broternet/video/"
+                + local_filename
+            )
+
+
+        # ====================================================
+        # VIDEO METADATA
+        # ====================================================
+
         video = {
             "title": title,
             "type": video_type,
@@ -1456,6 +1589,12 @@ def broternet_videos():
             "date": date,
             "id": user_id
         }
+
+
+        if local_source:
+
+            video["local_source"] = local_source
+
 
         filename = (
             f"{date}-{user_id}-{timestamp}.json"
@@ -1465,6 +1604,7 @@ def broternet_videos():
             BROTERNET_VIDEOS_DIR,
             filename
         )
+
 
         with open(
             filepath,
@@ -1478,6 +1618,7 @@ def broternet_videos():
                 indent=4,
                 ensure_ascii=False
             )
+
 
         return jsonify({
             "message": "Video published!",
