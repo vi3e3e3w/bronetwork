@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+
+# Copyright (C) 2026 Giang
+# SPDX-License-Identifier: GPL-3.0-only
+
+import ...
 # WARNING:
 # If it works, don't touch it.
 # If you touch it, it may stop working.
