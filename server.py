@@ -5,6 +5,8 @@
 # This code has succeeded as expected.
 import uuid
 import subprocess
+import threading
+import atexit
 from datetime import datetime
 import json
 import time
@@ -1390,6 +1392,176 @@ os.makedirs(
     exist_ok=True
 )
 
+BROTERNET_VIDEO_DOWNLOAD_JOBS = {}
+BROTERNET_VIDEO_DOWNLOAD_PROCESSES = {}
+BROTERNET_VIDEO_DOWNLOAD_THREADS = set()
+BROTERNET_VIDEO_DOWNLOAD_LOCK = threading.Lock()
+BROTERNET_VIDEO_DOWNLOAD_SHUTTING_DOWN = threading.Event()
+
+
+def broternet_video_download_progress(line, job):
+    match = re.search(r"(\d+(?:\.\d+)?)%", line)
+
+    if not match:
+        return
+
+    job["progress"] = float(match.group(1))
+
+    speed_match = re.search(r"\bat\s+(\S+)", line)
+    eta_match = re.search(r"\bETA\s+(\S+)", line)
+
+    if speed_match:
+        job["speed"] = speed_match.group(1)
+
+    if eta_match:
+        job["eta"] = eta_match.group(1)
+
+
+def broternet_video_download_worker(
+    job_id,
+    command,
+    title,
+    video_type,
+    source,
+    date,
+    user_id,
+    timestamp,
+    download_name,
+    local_filepath,
+):
+    job = BROTERNET_VIDEO_DOWNLOAD_JOBS[job_id]
+    process = None
+
+    try:
+        if BROTERNET_VIDEO_DOWNLOAD_SHUTTING_DOWN.is_set():
+            return
+
+        job["status"] = "starting"
+
+        process = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1
+        )
+
+        with BROTERNET_VIDEO_DOWNLOAD_LOCK:
+            BROTERNET_VIDEO_DOWNLOAD_PROCESSES[job_id] = process
+
+        job["status"] = "downloading"
+
+        for line in process.stdout:
+            if BROTERNET_VIDEO_DOWNLOAD_SHUTTING_DOWN.is_set():
+                break
+
+            broternet_video_download_progress(line, job)
+
+        if BROTERNET_VIDEO_DOWNLOAD_SHUTTING_DOWN.is_set():
+            process.terminate()
+            process.wait(timeout=5)
+            return
+
+        return_code = process.wait()
+
+        if return_code != 0:
+            job["status"] = "failed"
+            job["error"] = "Unable to download YouTube video"
+            return
+
+        if not os.path.isfile(local_filepath):
+            job["status"] = "failed"
+            job["error"] = (
+                "Video download completed but MP4 was not found"
+            )
+            return
+
+        local_filename = download_name + ".mp4"
+        video = {
+            "title": title,
+            "type": video_type,
+            "source": source,
+            "date": date,
+            "id": user_id,
+            "local_source": (
+                "/uploads/broternet/video/"
+                + local_filename
+            )
+        }
+
+        filename = f"{date}-{user_id}-{timestamp}.json"
+        filepath = os.path.join(
+            BROTERNET_VIDEOS_DIR,
+            filename
+        )
+
+        with open(
+            filepath,
+            "w",
+            encoding="utf-8"
+        ) as file:
+            json.dump(
+                video,
+                file,
+                indent=4,
+                ensure_ascii=False
+            )
+
+        job["progress"] = 100
+        job["status"] = "completed"
+        job["video"] = video
+
+    except FileNotFoundError:
+        job["status"] = "failed"
+        job["error"] = "yt-dlp is not installed on the server"
+
+    except (OSError, subprocess.SubprocessError) as error:
+        if not BROTERNET_VIDEO_DOWNLOAD_SHUTTING_DOWN.is_set():
+            print("yt-dlp failed:", error)
+        job["status"] = "failed"
+        job["error"] = "Unable to download YouTube video"
+
+    finally:
+        if process is not None:
+            stdout = process.stdout
+
+            if stdout is not None:
+                close_stdout = getattr(
+                    stdout,
+                    "close",
+                    None
+                )
+
+                if close_stdout:
+                    close_stdout()
+
+        with BROTERNET_VIDEO_DOWNLOAD_LOCK:
+            BROTERNET_VIDEO_DOWNLOAD_PROCESSES.pop(job_id, None)
+            BROTERNET_VIDEO_DOWNLOAD_THREADS.discard(
+                threading.current_thread()
+            )
+
+
+def stop_broternet_video_downloads():
+    BROTERNET_VIDEO_DOWNLOAD_SHUTTING_DOWN.set()
+
+    with BROTERNET_VIDEO_DOWNLOAD_LOCK:
+        processes = list(
+            BROTERNET_VIDEO_DOWNLOAD_PROCESSES.values()
+        )
+        threads = list(BROTERNET_VIDEO_DOWNLOAD_THREADS)
+
+    for process in processes:
+        if process.poll() is None:
+            process.terminate()
+
+    for thread in threads:
+        thread.join(timeout=5)
+
+
+atexit.register(stop_broternet_video_downloads)
+
+
 def is_youtube_url(url):
     try:
         parsed = urlparse(url)
@@ -1507,6 +1679,8 @@ def broternet_videos():
                 "yt-dlp",
 
                 "--no-playlist",
+                "--newline",
+                "--progress",
 
                 "--format",
                 "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
@@ -1519,37 +1693,6 @@ def broternet_videos():
                 source
             ]
 
-
-            try:
-
-                result = subprocess.run(
-                    command,
-                    capture_output=True,
-                    text=True,
-                    check=True
-                )
-
-            except FileNotFoundError:
-
-                return jsonify({
-                    "error":
-                        "yt-dlp is not installed on the server"
-                }), 500
-
-
-            except subprocess.CalledProcessError as error:
-
-                print(
-                    "yt-dlp failed:",
-                    error.stderr
-                )
-
-                return jsonify({
-                    "error":
-                        "Unable to download YouTube video"
-                }), 502
-
-
             local_filename = (
                 download_name
                 + ".mp4"
@@ -1561,21 +1704,38 @@ def broternet_videos():
                 local_filename
             )
 
+            job_id = str(uuid.uuid4())
+            BROTERNET_VIDEO_DOWNLOAD_JOBS[job_id] = {
+                "status": "queued",
+                "progress": 0,
+                "speed": None,
+                "eta": None
+            }
 
-            if not os.path.isfile(
-                local_filepath
-            ):
-
-                return jsonify({
-                    "error":
-                        "Video download completed but MP4 was not found"
-                }), 500
-
-
-            local_source = (
-                "/uploads/broternet/video/"
-                + local_filename
+            thread = threading.Thread(
+                target=broternet_video_download_worker,
+                args=(
+                    job_id,
+                    command,
+                    title,
+                    video_type,
+                    source,
+                    date,
+                    user_id,
+                    timestamp,
+                    download_name,
+                    local_filepath
+                )
             )
+
+            with BROTERNET_VIDEO_DOWNLOAD_LOCK:
+                BROTERNET_VIDEO_DOWNLOAD_THREADS.add(thread)
+
+            thread.start()
+
+            return jsonify({
+                "job_id": job_id
+            }), 202
 
 
         # ====================================================
@@ -1662,6 +1822,21 @@ def broternet_videos():
             )
 
     return jsonify(videos)
+
+
+@app.route(
+    "/api/broternet/videos/download-status/<job_id>",
+    methods=["GET"]
+)
+def broternet_video_download_status(job_id):
+    job = BROTERNET_VIDEO_DOWNLOAD_JOBS.get(job_id)
+
+    if not job:
+        return jsonify({
+            "error": "Download job not found"
+        }), 404
+
+    return jsonify(job)
 
 
 # ============================================================

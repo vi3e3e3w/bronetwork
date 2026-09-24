@@ -881,6 +881,21 @@ async function createVideo() {
             "video-file"
         );
 
+    const progressElement =
+        document.getElementById(
+            "video-download-progress"
+        );
+
+    const progressBar =
+        document.getElementById(
+            "video-download-progress-bar"
+        );
+
+    const progressText =
+        document.getElementById(
+            "video-download-progress-text"
+        );
+
 
     if (!titleInput || !typeInput) {
 
@@ -1083,6 +1098,19 @@ async function createVideo() {
 
         }
 
+        if (data.job_id) {
+
+            await pollVideoDownload(
+                data.job_id,
+                progressElement,
+                progressBar,
+                progressText
+            );
+
+            return;
+
+        }
+
 
         titleInput.value = "";
 
@@ -1122,6 +1150,83 @@ async function createVideo() {
         alert(
             "Unable to publish video."
         );
+
+    }
+
+}
+
+
+async function pollVideoDownload(
+    jobId,
+    progressElement,
+    progressBar,
+    progressText
+) {
+
+    while (true) {
+
+        const response =
+            await fetch(
+                "/api/broternet/videos/download-status/"
+                + jobId
+            );
+
+        const job =
+            await response.json();
+
+        if (!response.ok || job.status === "failed") {
+
+            if (progressElement) {
+                progressElement.style.display = "none";
+            }
+
+            alert(
+                job.error ||
+                "Unable to download YouTube video."
+            );
+
+            return;
+
+        }
+
+        if (
+            job.status === "downloading"
+            && progressElement
+        ) {
+
+            progressElement.style.display = "block";
+
+            const progress =
+                Math.round(job.progress || 0);
+
+            if (progressBar) {
+                progressBar.value = progress;
+            }
+
+            if (progressText) {
+                progressText.textContent =
+                    "Downloading: "
+                    + progress
+                    + "%";
+            }
+
+        }
+
+        if (job.status === "completed") {
+
+            if (progressElement) {
+                progressElement.style.display = "none";
+            }
+
+            document.getElementById("video-title").value = "";
+            document.getElementById("video-source").value = "";
+            document.getElementById("video-form").style.display = "none";
+            loadVideos();
+            return;
+
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
     }
 
@@ -1944,4 +2049,3 @@ loadMusic();
 updateVideoForm();
 
 loadImages();
-
