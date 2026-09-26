@@ -28,4 +28,10 @@ broternet/.interactions/*
 
 # Music out
 uploads/broternet/music
+
+# GitHub
 .github
+
+# User database
+users.json
+

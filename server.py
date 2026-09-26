@@ -3,7 +3,7 @@
 # Copyright (C) 2026 Giang
 # SPDX-License-Identifier: GPL-3.0-only
 
-import ...
+
 # WARNING:
 # If it works, don't touch it.
 # If you touch it, it may stop working.
@@ -24,7 +24,7 @@ from flask import Flask, request, jsonify, send_from_directory
 
 app = Flask(__name__)
 
-
+# [NOTE] A single incorrect indentation can cost you the entire project if it's written in Python.
 
 # ========================================================
 # CUSTOM 404
