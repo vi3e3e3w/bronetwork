@@ -967,7 +967,7 @@ async function createVideo() {
     // MP4 UPLOAD
     // ============================================
 
-    else if (type === "mp4") {
+    else if (type === "local") {
 
         if (
             !fileInput ||
@@ -975,7 +975,7 @@ async function createVideo() {
         ) {
 
             alert(
-                "Choose an MP4 file."
+                "Choose an MP4 or MOV file."
             );
 
             return;

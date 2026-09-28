@@ -1349,16 +1349,17 @@ def broternet_video_upload():
 
 
     allowed_types = {
-        "video/mp4"
+        "video/mp4",
+        "video/quicktime"
     }
 
 
     if (
-        not file.filename.lower().endswith(".mp4")
+            not file.filename.lower().endswith((".mp4",".mov"))
         or file.mimetype not in allowed_types
     ):
         return jsonify({
-            "error": "Only MP4 files are allowed"
+            "error": "Only MP4/MOV files are allowed"
         }), 400
 
 
@@ -1524,7 +1525,7 @@ def broternet_video_download_worker(
     except (OSError, subprocess.SubprocessError) as error:
         if not BROTERNET_VIDEO_DOWNLOAD_SHUTTING_DOWN.is_set():
             print("yt-dlp failed:", error)
-        job["status"] = "failed"
+
         job["error"] = "Unable to download YouTube video"
 
     finally:
@@ -1625,7 +1626,7 @@ def broternet_videos():
 
 
         if video_type not in [
-            "mp4",
+            "local",
             "embed"
         ]:
             return jsonify({
@@ -1689,7 +1690,8 @@ def broternet_videos():
                 "--progress",
 
                 "--format",
-                "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+                "bestvideo[vcodec^=avc1][ext=mp4]+bestaudio[acodec^=mp4a][ext=m4a]/best[vcodec^=avc1][ext=mp4]",
+
                 "--recode-video",
                 "mp4",
 
