@@ -36,3 +36,4 @@ uploads/broternet/music
 # XXX - If you want to use script from curent codec to H.264....you can use this script in alt release pack, but if you are android, or newer IOS, this will skip this script
 
 converter.sh
+.brostorage
