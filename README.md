@@ -51,3 +51,15 @@ BroNetwork is free software licensed under the **GNU General Public License v3.0
 
 See [`LICENSE`](LICENSE) for the full license text.
 
+## ⚠️ Privacy and Security Warning
+
+We respect your privacy. However, once personal information or files have been committed and pushed to a public repository, we cannot guarantee their removal from Git history, forks, clones, or other copies. You are responsible for reviewing your commits before pushing them.
+
+Broternet's local web environment is not completely secure. If you are a developer, please consider contributing a pull request to improve the project's ".gitignore" and help prevent personal or sensitive files from being committed accidentally.
+
+For parents and guardians: You can clone this project to give children a simulated Internet experience within a local network, without exposing them directly to strangers on the public Internet. However, a local network is not automatically safe. Please review the content, configure the environment carefully, and supervise its use.
+
+Remember: ".gitignore" helps prevent untracked files from being added to Git, but it does not automatically remove files that are already tracked or erase previously pushed content.
+
+
+
