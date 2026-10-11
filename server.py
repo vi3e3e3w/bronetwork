@@ -52,7 +52,6 @@ def page_not_found(error):
 </button>
 
     </body>
-
     </html>
     """, 404
 
@@ -161,6 +160,10 @@ def api_users():
 @app.route("/register", methods=["POST"])
 def register():
     ip = request.remote_addr
+
+    if ip is None:
+        return jsonify({"error":" could not determine client IP"}), 400
+    
     user_id = ip.split(".")[-1]
 
     users = load_users()
@@ -211,6 +214,10 @@ def chat_send():
         }), 400
 
     ip = request.remote_addr
+
+    if ip is None:
+        return jsonify({"error": "Could not determine client IP"}), 400
+
     user_id = ip.split(".")[-1]
 
     ping_match = re.search(
@@ -358,11 +365,18 @@ def upload():
         "inbox",
         target
     )
-
+    
     os.makedirs(
         inbox_dir,
         exist_ok=True
     )
+    filename = file.filename
+
+    if not filename:
+        return jsonify({
+            "error": "Missing filename"
+        }), 400
+
 
     filepath = os.path.join(
         inbox_dir,
