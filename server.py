@@ -19,12 +19,26 @@ import time
 import os
 import re
 from urllib.parse import urlparse
+import logging
 
 from flask import Flask, request, jsonify, send_from_directory
+from access_log import AccessLogMiddleware
+
 
 app = Flask(__name__)
-
+app.wsgi_app = AccessLogMiddleware(app.wsgi_app)
 # [NOTE] A single incorrect indentation can cost you the entire project if it's written in Python.
+
+
+# ========================================================
+# LOGGING HTTP CODE
+# ========================================================
+# Wish it may work (AI slop)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(levelname)s:%(name)s:%(message)s"
+)
 
 # ========================================================
 # CUSTOM 404
@@ -2659,6 +2673,7 @@ def static_files(filename):
         ".",
         filename
     )
+
 
 
 if __name__ == "__main__":
