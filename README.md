@@ -31,6 +31,14 @@ cd bronetwork
 python3 server.py
 ```
 
+or
+
+```bash
+wget "https://github.com/vi3e3e3w/bronetwork/releases/download/Release/install-bronetwork.sh"
+chmod +x install-bronetwork.sh
+```
+if you don't care about IT/Linux
+
 Then open:
 
 ```text
