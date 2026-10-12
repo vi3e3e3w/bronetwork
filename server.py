@@ -64,7 +64,7 @@ def page_not_found(error):
         <button onclick="window.location.href='/'">
     ← go home lol
 </button>
-
+    <img src="mascot/broscope-404.svg" alt="I I can't find the page you're looking for!">
     </body>
     </html>
     """, 404
