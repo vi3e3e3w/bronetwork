@@ -13,6 +13,16 @@ if ! git pull;then
 
 cd "$PROJECT_DIR"
 
+echo "Updating BroNetwork executable if possible..."
+
+if install -m 755 \
+    "$HOME/bronetwork/bronetwork.sh" \
+    "$HOME/.local/bin/bronetwork"; then
+    echo "[OK] Executable installed: ~/.local/bin/bronetwork"
+else
+    echo "[E] Failed to update executable."
+    exit 1
+fi
 echo "Checking virtual environment..."
 
 if [[ ! -f "$VENV_DIR/bin/activate" ]]; then
@@ -33,7 +43,7 @@ python -m pip install -r "$PROJECT_DIR/requirements.txt"
 if ! command -v waitress-serve >/dev/null 2>&1; then
     echo "Error: waitress-serve is not installed in the virtual environment."
     exit 3
-    
+
 fi
 
 echo "Starting BroNetwork with Waitress..."
