@@ -1433,13 +1433,6 @@ BROTERNET_VIDEO_DOWNLOAD_THREADS = set()
 BROTERNET_VIDEO_DOWNLOAD_LOCK = threading.Lock()
 BROTERNET_VIDEO_DOWNLOAD_SHUTTING_DOWN = threading.Event()
 
- process = subprocess.Popen(
-            command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1
-        )
 
 
 def broternet_video_download_progress(line, job):
@@ -1458,6 +1451,15 @@ def broternet_video_download_progress(line, job):
 
     if eta_match:
         job["eta"] = eta_match.group(1)
+
+    process = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1
+        )
+
 
     for line in process.stdout:
         if BROTERNET_VIDEO_DOWNLOAD_SHUTTING_DOWN.is_set():
