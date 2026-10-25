@@ -1433,6 +1433,14 @@ BROTERNET_VIDEO_DOWNLOAD_THREADS = set()
 BROTERNET_VIDEO_DOWNLOAD_LOCK = threading.Lock()
 BROTERNET_VIDEO_DOWNLOAD_SHUTTING_DOWN = threading.Event()
 
+ process = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1
+        )
+
 
 def broternet_video_download_progress(line, job):
     match = re.search(r"(\d+(?:\.\d+)?)%", line)
@@ -1482,14 +1490,6 @@ def broternet_video_download_worker(
             return
 
         job["status"] = "starting"
-
-        process = subprocess.Popen(
-            command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1
-        )
 
         with BROTERNET_VIDEO_DOWNLOAD_LOCK:
             BROTERNET_VIDEO_DOWNLOAD_PROCESSES[job_id] = process
@@ -1594,7 +1594,7 @@ def broternet_video_download_worker(
             BROTERNET_VIDEO_DOWNLOAD_PROCESSES.pop(job_id, None)
             BROTERNET_VIDEO_DOWNLOAD_THREADS.discard(
                 threading.current_thread()
-            )
+                )
 
 
 def stop_broternet_video_downloads():
