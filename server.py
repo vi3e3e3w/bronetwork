@@ -1452,25 +1452,6 @@ def broternet_video_download_progress(line, job):
     if eta_match:
         job["eta"] = eta_match.group(1)
 
-    process = subprocess.Popen(
-            command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1
-        )
-
-
-    for line in process.stdout:
-        if BROTERNET_VIDEO_DOWNLOAD_SHUTTING_DOWN.is_set():
-            break
-
-        line = line.rstrip()
-        broternet_video_download_progress(line, job)
-
-        if "ERROR:" in line:
-            error_lines.append(line)
-
 
 def broternet_video_download_worker(
     job_id,
@@ -1492,6 +1473,14 @@ def broternet_video_download_worker(
             return
 
         job["status"] = "starting"
+
+        process = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1
+        )
 
         with BROTERNET_VIDEO_DOWNLOAD_LOCK:
             BROTERNET_VIDEO_DOWNLOAD_PROCESSES[job_id] = process
