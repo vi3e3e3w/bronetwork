@@ -70,4 +70,6 @@ For parents and guardians: You can clone this project to give children a simulat
 Remember: ".gitignore" helps prevent untracked files from being added to Git, but it does not automatically remove files that are already tracked or erase previously pushed content.
 
 
+## News
 
+Read some useful news in NEWS.md =D
