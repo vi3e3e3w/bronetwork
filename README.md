@@ -34,7 +34,7 @@ python3 server.py
 or
 
 ```bash
-wget "https://github.com/vi3e3e3w/bronetwork/releases/download/Release/install-bronetwork.sh"
+wget "https://github.com/vi3e3e3w/bronetwork/releases/download/Release_1-5/install-bronetwork.sh"
 chmod +x install-bronetwork.sh
 ```
 if you don't care about IT/Linux
@@ -72,4 +72,4 @@ Remember: ".gitignore" helps prevent untracked files from being added to Git, bu
 
 ## News
 
-Read some useful news in NEWS.md =D
+Read some useful news in [`NEWS`](NEWS.md) =D
