@@ -4,14 +4,14 @@ set -e
 PROJECT_DIR="$HOME/bronetwork"
 VENV_DIR="$PROJECT_DIR/.venv"
 REPO_URL="https://github.com/vi3e3e3w/bronetwork"
-
+cd "$PROJECT_DIR"
 echo "Checking Bro Network's up-to-date..."
 
 if ! git pull;then 
     echo "Failed to update"
     exit 1
+fi
 
-cd "$PROJECT_DIR"
 
 echo "Updating BroNetwork executable if possible..."
 
