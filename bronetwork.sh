@@ -8,8 +8,7 @@ cd "$PROJECT_DIR"
 echo "Checking Bro Network's up-to-date..."
 
 if ! git pull;then 
-    echo "Failed to update"
-    exit 1
+    echo "[W] Failed to update, skipping "
 fi
 
 
